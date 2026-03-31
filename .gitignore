@@ -1,0 +1,33 @@
+# Git exclusions for Solana/Anchor projects
+.anchor
+.DS_Store
+target/
+**/*.rs.bk
+node_modules/
+test-ledger/
+.yarn/
+
+# Environment and secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+**/.env
+**/.env.local
+
+# Solana Keypairs & sensitive JS/TS logic
+**/*-keypair.json
+**/id.json
+**/export_key.js
+**/export_key.ts
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# OS files
+Thumbs.db
+desktop.ini
