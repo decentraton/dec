@@ -2,40 +2,140 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import OpenAI from "openai";
 import { fetchSolPrice } from "./utils/market.js";
 
-export async function analyzeWithAI(signals: any, genAI: GoogleGenerativeAI, openai: OpenAI): Promise<{ multiplier: number; reasoning: string }> {
-  // Enrich signals with real-market data
-  const solPrice = await fetchSolPrice();
-  const enrichedSignals = { ...signals, solPrice };
+const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 
-  const prompt = `You are an autonomous DePIN pricing oracle for GPU compute rentals.
-Current market signals: ${JSON.stringify(enrichedSignals)}.
-Calculate a price multiplier. 100 = 1.0x (base price).
-Range: min 50 (0.5x) to max 300 (3.0x).
-Respond ONLY with valid JSON, no markdown:
-{ "multiplier": 150, "reasoning": "One sentence explanation." }`;
+// Per-model API version (gemini-2.5-* only available in v1beta)
+const MODEL_ENDPOINTS: Record<string, string> = {
+  "gemini-2.5-flash":       "https://generativelanguage.googleapis.com/v1beta",
+  "gemini-2.5-flash-lite":  "https://generativelanguage.googleapis.com/v1beta",
+  "gemini-2.0-flash":       "https://generativelanguage.googleapis.com/v1",
+  "gemini-2.0-flash-lite":  "https://generativelanguage.googleapis.com/v1",
+};
 
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    const clean = text.replace(/```json/g, "").replace(/```/g, "").trim();
-    return JSON.parse(clean);
-  } catch (e: any) {
-    console.warn(`[AI] Gemini failed: ${e.message?.slice(0, 100)}...`);
-    
-    // Fallback
+const GEMINI_MODELS = [
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-lite",
+];
+
+/** Strip markdown fences and code blocks, return parsed JSON */
+function extractJson(raw: string): any {
+  // Remove ```json\n...\n``` or ```\n...\n```
+  let s = raw
+    .replace(/```json\s*/gi, "")
+    .replace(/```\s*/g, "")
+    .trim();
+  // Find outermost JSON object
+  const start = s.indexOf("{");
+  const end   = s.lastIndexOf("}");
+  if (start !== -1 && end !== -1 && end > start) {
+    s = s.slice(start, end + 1);
+  }
+  return JSON.parse(s);
+}
+
+/** Normalise: AI sometimes returns 50-300 scale; convert to 0.5-3.0 */
+function normMul(v: number): number {
+  if (v > 10) v = v / 100;
+  return parseFloat(Math.max(0.5, Math.min(3.0, v)).toFixed(3));
+}
+
+/** Call Gemini REST API directly (bypasses SDK's v1beta default) */
+async function callGeminiRest(modelName: string, prompt: string): Promise<{ multiplier: number; reasoning: string }> {
+  const base = MODEL_ENDPOINTS[modelName] || "https://generativelanguage.googleapis.com/v1";
+  const url  = `${base}/models/${modelName}:generateContent?key=${GEMINI_KEY}`;
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.3,
+      maxOutputTokens: 512,   // increased to avoid truncation
+      candidateCount: 1,
+    },
+  };
+
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(`HTTP ${resp.status}: ${(err as any).error?.message?.slice(0, 100) || resp.statusText}`);
+  }
+
+  const data: any = await resp.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  if (!text) throw new Error("Empty response");
+
+  const parsed = extractJson(text);
+  if (typeof parsed.multiplier !== "number") throw new Error("No multiplier in response");
+  return { multiplier: normMul(parsed.multiplier), reasoning: String(parsed.reasoning || "") };
+}
+
+export async function analyzeWithAI(
+  signals: any,
+  genAI: GoogleGenerativeAI,
+  openai: OpenAI
+): Promise<{ multiplier: number; reasoning: string }> {
+
+  const solPrice        = await fetchSolPrice();
+  const enrichedSignals = { ...signals, solPrice, isoTime: new Date().toISOString() };
+
+  const prompt = `You are an autonomous DePIN pricing oracle for GPU compute on Solana.
+
+Market signals: ${JSON.stringify(enrichedSignals)}
+
+Task: determine an optimal GPU rental price multiplier.
+- 1.0  = base price (no change)
+- >1.0 = price premium (high demand / GPU shortage / bull market)
+- <1.0 = discount (low demand / bear market)
+- Allowed range: 0.50 to 3.00
+- Be decisive — do NOT always return 1.0
+
+Respond ONLY with raw JSON, no markdown:
+{"multiplier": 1.25, "reasoning": "Brief one-sentence reason."}`;
+
+  // ── Try each Gemini model via v1 REST ──────────────────────
+  for (const model of GEMINI_MODELS) {
     try {
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" },
-      });
-      const content = response.choices[0].message?.content || "{}";
-      return JSON.parse(content);
-    } catch (oaiErr: any) {
-      console.error("[AI] OpenAI fallback failed");
+      console.log(`[AI] Calling ${model} via v1 REST…`);
+      const res = await callGeminiRest(model, prompt);
+      console.log(`[AI] ✅ ${model} → ${res.multiplier}× | "${res.reasoning.slice(0, 60)}"`);
+      return res;
+    } catch (e: any) {
+      console.warn(`[AI] ❌ ${model}: ${e.message?.slice(0, 120)}`);
     }
   }
 
-  return { multiplier: 100, reasoning: "Fallback to baseline due to AI provider errors." };
+  // ── Try OpenAI fallback ─────────────────────────────────────
+  if (GEMINI_KEY.length < 5 || true) { // also try if all Gemini fail
+    try {
+      console.log("[AI] Trying gpt-4o-mini…");
+      const resp = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+        max_tokens: 200,
+      });
+      const content = resp.choices[0].message?.content || "{}";
+      const parsed  = JSON.parse(content);
+      if (typeof parsed.multiplier !== "number") throw new Error("No multiplier");
+      const mul = normMul(parsed.multiplier);
+      console.log(`[AI] ✅ gpt-4o-mini → ${mul}×`);
+      return { multiplier: mul, reasoning: String(parsed.reasoning || "") };
+    } catch (e: any) {
+      console.warn(`[AI] ❌ gpt-4o-mini: ${e.message?.slice(0, 100)}`);
+    }
+  }
+
+  // ── Market-aware fallback (no AI) ───────────────────────────
+  const fallback = solPrice > 150 ? 1.20 : solPrice > 100 ? 1.10 : solPrice < 60 ? 0.90 : 1.00;
+  console.error(`[AI] All providers failed. Market fallback: ${fallback}×`);
+  return {
+    multiplier: fallback,
+    reasoning: `AI unavailable. SOL @ $${solPrice.toFixed(2)} → market-implied ${fallback}×`,
+  };
 }

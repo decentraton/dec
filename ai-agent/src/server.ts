@@ -227,10 +227,11 @@ app.post("/api/simulate/:event", async (req: Request, res: Response) => {
         const enriched = await enrichWithMarketData(mockData);
         const decision = await analyzeWithAI(enriched, genAI, openai);
         const rHash = hashReasoning(decision.reasoning);
-        const tx = await updateOnChain(program, oracleKeypair, decision.multiplier, decision.reasoning);
+        const mulScaled = Math.round(decision.multiplier * 100); // 1.25 → 125 for on-chain
+        const tx = await updateOnChain(program, oracleKeypair, mulScaled, decision.reasoning);
 
         const entry: AnalysisEntry = {
-            multiplier: decision.multiplier / 100,
+            multiplier: decision.multiplier,  // store 0.5-3.0 scale
             reasoning: decision.reasoning,
             reasoningHash: rHash,
             timestamp: Date.now(),
@@ -257,10 +258,11 @@ app.post("/api/trigger-update", async (req: Request, res: Response) => {
         const enriched = await enrichWithMarketData(signals);
         const decision = await analyzeWithAI(enriched, genAI, openai);
         const rHash = hashReasoning(decision.reasoning);
-        const tx = await updateOnChain(program, oracleKeypair, decision.multiplier, decision.reasoning);
+        const mulScaled = Math.round(decision.multiplier * 100); // 1.15 → 115
+        const tx = await updateOnChain(program, oracleKeypair, mulScaled, decision.reasoning);
 
         const entry: AnalysisEntry = {
-            multiplier: decision.multiplier / 100,
+            multiplier: decision.multiplier,
             reasoning: decision.reasoning,
             reasoningHash: rHash,
             timestamp: Date.now(),
@@ -288,12 +290,13 @@ async function runAutonomousUpdate() {
         const enriched = await enrichWithMarketData(signals);
         const decision = await analyzeWithAI(enriched, genAI, openai);
         const rHash = hashReasoning(decision.reasoning);
-        const tx = await updateOnChain(program, oracleKeypair, decision.multiplier, decision.reasoning);
+        const mulScaled = Math.round(decision.multiplier * 100); // 1.20 → 120
+        const tx = await updateOnChain(program, oracleKeypair, mulScaled, decision.reasoning);
 
         if (tx) {
             const solPrice = await fetchSolPrice();
             const entry: AnalysisEntry = {
-                multiplier: decision.multiplier / 100,
+                multiplier: decision.multiplier,  // store 0.5-3.0
                 reasoning: decision.reasoning,
                 reasoningHash: rHash,
                 timestamp: Date.now(),
@@ -305,7 +308,7 @@ async function runAutonomousUpdate() {
             lastAnalysis = entry;
             pushHistory(entry);
             totalUpdates++;
-            console.log(`[AUTONOMOUS] ✅ Update successful: ${tx}`);
+            console.log(`[AUTONOMOUS] ✅ multiplier=${decision.multiplier.toFixed(3)} tx=${tx}`);
         }
     } catch (err: any) {
         if (err.message?.includes("CooldownNotElapsed")) {
