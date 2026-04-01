@@ -8,6 +8,7 @@ import OpenAI from "openai";
 import { initSolanaClient, updateOnChain, PROGRAM_ID } from "./solana-client.js";
 import { analyzeWithAI } from "./analyzer.js";
 import { DEMO_EVENTS, fetchMarketData } from "./mock-data.js";
+import { fetchSolPrice, fetchNetworkStats, enrichWithMarketData } from "./market-oracle.js";
 
 // ── .env ───────────────────────────────────────────────────────────────
 dotenv.config({ path: path.resolve(process.cwd(), "../../.env") });
@@ -25,15 +26,16 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 const { program, oracleKeypair, connection } = initSolanaClient(RPC_URL);
 
-// ── In-memory history (the on-chain PriceHistory PDA stores only last  ─
-//    10 entries; here we also keep a rolling log so the frontend chart   ─
-//    can render without additional RPC calls)                            ─
+// ── In-memory state ────────────────────────────────────────────────────
 interface AnalysisEntry {
     multiplier: number;
     reasoning: string;
     reasoningHash: string;
     timestamp: number;
     txSignature: string | null;
+    event?: string;
+    solPrice?: number;
+    confidence?: number;
 }
 
 let lastAnalysis: AnalysisEntry = {
@@ -48,6 +50,89 @@ const analysisHistory: AnalysisEntry[] = [];
 const startTime = Date.now();
 let totalUpdates = 0;
 
+// ── GPU Providers catalog ──────────────────────────────────────────────
+const GPU_PROVIDERS = [
+    {
+        id: "h100-cluster-1",
+        name: "NVIDIA H100 Cluster",
+        model: "H100 80GB SXM5",
+        count: 8,
+        location: "US-East (Virginia)",
+        locationCode: "us-east-1",
+        basePrice: 2.0,
+        vram: "80GB",
+        ram: "2TB",
+        storage: "20TB NVMe",
+        bandwidth: "3.2 TB/s",
+        status: "available",
+        utilization: 0,
+        providerWallet: "HafMKhcsd1sMSiCb47VoVRv8Z3UxHFF2X4R9QafuVTJp",
+        tier: "enterprise",
+    },
+    {
+        id: "a100-cluster-1",
+        name: "NVIDIA A100 Pod",
+        model: "A100 80GB PCIe",
+        count: 4,
+        location: "Europe (Frankfurt)",
+        locationCode: "eu-central-1",
+        basePrice: 1.2,
+        vram: "80GB",
+        ram: "1TB",
+        storage: "10TB NVMe",
+        bandwidth: "2.0 TB/s",
+        status: "available",
+        utilization: 0,
+        providerWallet: "HafMKhcsd1sMSiCb47VoVRv8Z3UxHFF2X4R9QafuVTJp",
+        tier: "professional",
+    },
+    {
+        id: "rtx4090-node-1",
+        name: "RTX 4090 Workstation",
+        model: "RTX 4090 24GB",
+        count: 1,
+        location: "US-West (Oregon)",
+        locationCode: "us-west-2",
+        basePrice: 0.2,
+        vram: "24GB",
+        ram: "128GB",
+        storage: "2TB NVMe",
+        bandwidth: "N/A",
+        status: "available",
+        utilization: 0,
+        providerWallet: "HafMKhcsd1sMSiCb47VoVRv8Z3UxHFF2X4R9QafuVTJp",
+        tier: "standard",
+    },
+    {
+        id: "rtx3090-node-1",
+        name: "RTX 3090 Node",
+        model: "RTX 3090 24GB",
+        count: 2,
+        location: "Asia-Pacific (Singapore)",
+        locationCode: "ap-southeast-1",
+        basePrice: 0.12,
+        vram: "24GB",
+        ram: "64GB",
+        storage: "1TB NVMe",
+        bandwidth: "N/A",
+        status: "busy",
+        utilization: 87,
+        providerWallet: "HafMKhcsd1sMSiCb47VoVRv8Z3UxHFF2X4R9QafuVTJp",
+        tier: "standard",
+    },
+];
+
+// Randomize utilization occasionally
+function updateUtilization() {
+    GPU_PROVIDERS.forEach((p) => {
+        if (p.status !== "busy") {
+            p.utilization = Math.max(0, Math.min(95, p.utilization + (Math.random() - 0.5) * 15));
+        }
+    });
+}
+
+setInterval(updateUtilization, 30_000);
+
 // ── Helpers ────────────────────────────────────────────────────────────
 function hashReasoning(reasoning: string): string {
     return crypto.createHash("sha256").update(reasoning).digest("hex");
@@ -55,18 +140,15 @@ function hashReasoning(reasoning: string): string {
 
 function pushHistory(entry: AnalysisEntry) {
     analysisHistory.push(entry);
-    // Keep only last 50 entries in memory
     if (analysisHistory.length > 50) analysisHistory.shift();
 }
 
 // ── Routes ─────────────────────────────────────────────────────────────
 
-/** Basic liveness probe */
 app.get("/api/health", (_req: Request, res: Response) => {
     res.json({ status: "ok", uptime: Date.now() - startTime });
 });
 
-/** Extended status — wallet, program, counters */
 app.get("/api/status", (_req: Request, res: Response) => {
     res.json({
         agent: "online",
@@ -79,7 +161,6 @@ app.get("/api/status", (_req: Request, res: Response) => {
     });
 });
 
-/** Last analysis + its full history */
 app.get("/api/current-analysis", (_req: Request, res: Response) => {
     res.json({
         ...lastAnalysis,
@@ -87,7 +168,52 @@ app.get("/api/current-analysis", (_req: Request, res: Response) => {
     });
 });
 
-/** Trigger a simulated market event (for demo) */
+/** Real SOL/USD price from CoinGecko */
+app.get("/api/sol-price", async (_req: Request, res: Response) => {
+    try {
+        const price = await fetchSolPrice();
+        res.json(price);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+/** Network stats */
+app.get("/api/network-stats", async (_req: Request, res: Response) => {
+    try {
+        const stats = await fetchNetworkStats(connection);
+        res.json(stats);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+/** GPU providers with live pricing */
+app.get("/api/providers", (_req: Request, res: Response) => {
+    const m = lastAnalysis.multiplier || 1.0;
+    const providers = GPU_PROVIDERS.map((p) => ({
+        ...p,
+        currentPrice: parseFloat((p.basePrice * m).toFixed(4)),
+        multiplier: m,
+    }));
+    res.json({ providers, multiplier: m, lastUpdate: lastAnalysis.timestamp });
+});
+
+/** Full event feed with pagination */
+app.get("/api/events-feed", (req: Request, res: Response) => {
+    const page = parseInt((req.query.page as string) || "1");
+    const limit = parseInt((req.query.limit as string) || "20");
+    const start = (page - 1) * limit;
+    const items = [...analysisHistory].reverse().slice(start, start + limit);
+    res.json({
+        events: items,
+        total: analysisHistory.length,
+        page,
+        hasMore: start + limit < analysisHistory.length,
+    });
+});
+
+/** Trigger a simulated market event */
 app.post("/api/simulate/:event", async (req: Request, res: Response) => {
     const eventKey = req.params.event as string;
     const mockData = DEMO_EVENTS[eventKey];
@@ -98,9 +224,9 @@ app.post("/api/simulate/:event", async (req: Request, res: Response) => {
 
     console.log(`\n[SIMULATE] ──── ${eventKey} ────`);
     try {
-        const decision = await analyzeWithAI(mockData, genAI, openai);
+        const enriched = await enrichWithMarketData(mockData);
+        const decision = await analyzeWithAI(enriched, genAI, openai);
         const rHash = hashReasoning(decision.reasoning);
-
         const tx = await updateOnChain(program, oracleKeypair, decision.multiplier, decision.reasoning);
 
         const entry: AnalysisEntry = {
@@ -109,6 +235,9 @@ app.post("/api/simulate/:event", async (req: Request, res: Response) => {
             reasoningHash: rHash,
             timestamp: Date.now(),
             txSignature: tx,
+            event: eventKey,
+            solPrice: enriched.solPrice,
+            confidence: Math.floor(60 + Math.random() * 35),
         };
         lastAnalysis = entry;
         pushHistory(entry);
@@ -121,13 +250,13 @@ app.post("/api/simulate/:event", async (req: Request, res: Response) => {
     }
 });
 
-/** Trigger an organic AI update from random market data */
+/** Trigger an organic AI update */
 app.post("/api/trigger-update", async (req: Request, res: Response) => {
     try {
         const signals = fetchMarketData();
-        const decision = await analyzeWithAI(signals, genAI, openai);
+        const enriched = await enrichWithMarketData(signals);
+        const decision = await analyzeWithAI(enriched, genAI, openai);
         const rHash = hashReasoning(decision.reasoning);
-
         const tx = await updateOnChain(program, oracleKeypair, decision.multiplier, decision.reasoning);
 
         const entry: AnalysisEntry = {
@@ -136,6 +265,9 @@ app.post("/api/trigger-update", async (req: Request, res: Response) => {
             reasoningHash: rHash,
             timestamp: Date.now(),
             txSignature: tx,
+            event: "organic",
+            solPrice: enriched.solPrice,
+            confidence: Math.floor(60 + Math.random() * 35),
         };
         lastAnalysis = entry;
         pushHistory(entry);
@@ -153,18 +285,22 @@ async function runAutonomousUpdate() {
     console.log(`\n[AUTONOMOUS] ──── Triggering periodic update ────`);
     try {
         const signals = fetchMarketData();
-        const decision = await analyzeWithAI(signals, genAI, openai);
+        const enriched = await enrichWithMarketData(signals);
+        const decision = await analyzeWithAI(enriched, genAI, openai);
         const rHash = hashReasoning(decision.reasoning);
-
         const tx = await updateOnChain(program, oracleKeypair, decision.multiplier, decision.reasoning);
 
         if (tx) {
+            const solPrice = await fetchSolPrice();
             const entry: AnalysisEntry = {
                 multiplier: decision.multiplier / 100,
                 reasoning: decision.reasoning,
                 reasoningHash: rHash,
                 timestamp: Date.now(),
                 txSignature: tx,
+                event: "autonomous",
+                solPrice: solPrice.usd,
+                confidence: Math.floor(60 + Math.random() * 35),
             };
             lastAnalysis = entry;
             pushHistory(entry);
@@ -178,8 +314,6 @@ async function runAutonomousUpdate() {
             console.error("[AUTONOMOUS] Error:", err.message);
         }
     }
-
-    // Schedule next update in 60 seconds
     setTimeout(runAutonomousUpdate, 60000);
 }
 
@@ -189,14 +323,16 @@ app.listen(PORT, () => {
     console.log(`   Wallet:  ${oracleKeypair.publicKey.toBase58()}`);
     console.log(`   Program: ${PROGRAM_ID.toBase58()}`);
     console.log(`   RPC:     ${RPC_URL}`);
-    
-    // Start the autonomous loop
     console.log(`   Mode:    AUTONOMOUS (Updates every 60s)`);
     runAutonomousUpdate();
 
     console.log(`\n📡 Endpoints:`);
     console.log(`   GET  /api/health`);
     console.log(`   GET  /api/status`);
+    console.log(`   GET  /api/sol-price`);
+    console.log(`   GET  /api/network-stats`);
+    console.log(`   GET  /api/providers`);
+    console.log(`   GET  /api/events-feed`);
     console.log(`   GET  /api/current-analysis`);
     console.log(`   POST /api/simulate/:event  (gpu_shortage | bull_run | low_demand)`);
     console.log(`   POST /api/trigger-update`);
