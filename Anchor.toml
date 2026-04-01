@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-depin_pricing = "7yErp5yo4oE3SoQrz83Z9q97uBYJ5am4eLE4VRmpgmZB"
+depin_pricing = "36rS72Rgx7WesAjwv2cernhGDHBWXZuS3wpCTJVwULPj"
 
 [registry]
 url = "https://api.apr.dev"
@@ -16,4 +16,3 @@ wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
-

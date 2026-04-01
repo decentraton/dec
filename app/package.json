@@ -31,5 +31,8 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.14",
     "@eslint/eslintrc": "^3"
+  },
+  "overrides": {
+    "plain-crypto-js": "npm:crypto-js@4.2.0"
   }
 }

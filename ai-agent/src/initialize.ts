@@ -15,7 +15,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: path.resolve(process.cwd(), "../../.env") });
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
-const PROGRAM_ID = new PublicKey("7yErp5yo4oE3SoQrz83Z9q97uBYJ5am4eLE4VRmpgmZB");
+const PROGRAM_ID = new PublicKey("36rS72Rgx7WesAjwv2cernhGDHBWXZuS3wpCTJVwULPj");
 const RPC_URL = process.env.HELIUS_RPC_URL || "https://api.devnet.solana.com";
 const IDL_PATH = path.resolve(process.cwd(), "../target/idl/depin_pricing.json");
 const WALLET_PATH = path.join(os.homedir(), ".config/solana/id.json");

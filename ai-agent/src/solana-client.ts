@@ -6,7 +6,7 @@ import * as crypto from "crypto";
 import * as path from "path";
 import * as os from "os";
 
-export const PROGRAM_ID = new PublicKey("7yErp5yo4oE3SoQrz83Z9q97uBYJ5am4eLE4VRmpgmZB");
+export const PROGRAM_ID = new PublicKey("36rS72Rgx7WesAjwv2cernhGDHBWXZuS3wpCTJVwULPj");
 
 export function initSolanaClient(rpcUrl: string) {
     const IDL_PATH = path.resolve(process.cwd(), "../target/idl/depin_pricing.json");

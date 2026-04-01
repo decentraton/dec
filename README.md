@@ -27,12 +27,13 @@ AI-powered dynamic pricing oracle for DePIN GPU compute networks, built on Solan
 
 ## 📋 System Requirements & Setup
 
-### Global Prerequisites
-*   **Rust & Cargo (v1.75.0+):** Required for compiling the Anchor smart contract.
-*   **Solana CLI (v1.18.x+):** Standard toolkit for interacting with the Solana network.
-*   **Anchor CLI (v0.30.1 precisely):** Essential for build and deployment consistency.
-*   **Node.js (v20.x+):** Runtime environment for the Pricing Agent and Frontend.
-*   **npm or yarn:** Package managers for dependencies.
+### 📌 Tested Environment & Precise Versions
+To guarantee a successful build, ensure your environment strictly matches these versions:
+*   **Rust & Cargo:** `v1.75.0` (required due to feature differences in newer Rust compilers)
+*   **Solana CLI:** `v1.18.26`
+*   **Anchor CLI:** `v0.30.1` (with `proc-macro2` pinned to `1.0.86`)
+*   **Node.js:** `v20.x+` (NPM overrides required for frontend)
+*   **Next.js:** `v15.5.14` | **React:** `v19.1.0`
 
 ### Local Configuration
 *   **Devnet Balance:** Your CLI wallet (`id.json`) must have at least 2-3 SOL for deployment.
@@ -49,20 +50,27 @@ AI-powered dynamic pricing oracle for DePIN GPU compute networks, built on Solan
 > Next.js frontend communicates with. Both must run on the **same machine**
 > during the demo to avoid CORS/network issues.
 
-### 1. Environment Setup
-Create a `.env` in the project root:
+### 1. Environment & Global Setup
+Clone the repository and create `.env` in the project root:
 ```env
 HELIUS_RPC_URL=https://devnet.helius-rpc.com/?api-key=xxx
 GEMINI_API_KEY=your_gemini_api_key
 OPENAI_API_KEY=your_openai_api_key  # optional fallback
+ORACLE_PRIVATE_KEY="[24,186,105, ...]" # exported from your id.json
+```
+Install strictly `Rust 1.75.0`:
+```bash
+rustup default 1.75.0
 ```
 
 ### 2. Deploy Smart Contract
+Sync the keys to generate a new Program ID, then build and deploy to Devnet.
 ```bash
-cd depin_pricing
+anchor keys sync
 anchor build
 anchor deploy --provider.cluster devnet
 ```
+*Note: Update the new Program ID in `ai-agent/src/initialize.ts` and `ai-agent/src/solana-client.ts` after deployment.*
 
 ### 3. Initialize & Start AI Agent
 ```bash
@@ -73,11 +81,44 @@ npm run start  # Starts Express API on http://localhost:3001
 ```
 
 ### 4. Start Frontend
+Use `--legacy-peer-deps` due to React 19 peer dependencies:
 ```bash
 cd app
-npm install
+npm install --legacy-peer-deps
 npm run dev    # Next.js on http://localhost:3000
 ```
+
+---
+
+## 🔧 Troubleshooting & Known Errors
+
+If you run into issues putting this on a new machine, refer to these common compilation/setup errors:
+
+**1. `no method named source_file found for struct proc_macro2::Span`**
+*   **Cause:** Anchor 0.30.1 IDL generation breaks with `proc-macro2 >= 1.0.89` because the configuration flag was deprecated.
+*   **Fix:** Downgrade the dependencies manually via Cargo to compatible versions before building:
+    ```bash
+    cargo update -p syn@2 --precise 2.0.79
+    cargo update -p proc-macro2@1 --precise 1.0.86
+    ```
+
+**2. Frontend NPM Install Fails with 404 for `plain-crypto-js`**
+*   **Cause:** The package `plain-crypto-js-4.2.1.tgz` was recently taken down from the NPM Registry, breaking downstream wallet-adapter SDKs.
+*   **Fix:** Add an `overrides` block inside `app/package.json`:
+    ```json
+    "overrides": {
+      "plain-crypto-js": "npm:crypto-js@4.2.0"
+    }
+    ```
+    Then remove `package-lock.json` and reinstall `npm install --legacy-peer-deps`.
+
+**3. `UnauthorizedOracle` (Error Code: 6000) during Agent execution**
+*   **Cause:** The Protocol is completely isolated. If you didn't execute `npm run init` with your specific wallet, or if you're hitting an old Program ID, the contract rejects the price update.
+*   **Fix:** Ensure you performed `anchor keys sync` to use your own Program ID, rebuilt, redeployed, and ran `npm run init` using a wallet backed by your `ORACLE_PRIVATE_KEY`.
+
+**4. Rate Limiting on Devnet Airdrops**
+*   **Cause:** `solana airdrop 1` frequently encounters IP limits on official endpoint limits.
+*   **Fix:** Use web faucets (e.g., Faucet.solana.com, Quicknode) or extract an existing funded keypair from `~/.config/solana/*.json` using the command `cat ~/.config/solana/id.json`.
 
 ---
 
