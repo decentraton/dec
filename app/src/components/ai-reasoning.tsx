@@ -4,14 +4,12 @@ import { useEffect, useState, useRef } from "react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-/* Blinking cursor */
 function Cursor() {
   const [on, setOn] = useState(true);
-  useEffect(() => { const i = setInterval(() => setOn(v => !v), 540); return () => clearInterval(i); }, []);
-  return <span aria-hidden="true" style={{ opacity: on ? 1 : 0, color: "var(--acid)", userSelect: "none" }}>▌</span>;
+  useEffect(() => { const i = setInterval(() => setOn(v => !v), 550); return () => clearInterval(i); }, []);
+  return <span aria-hidden="true" style={{ opacity: on ? 1 : 0, color: "var(--acid)" }}>▌</span>;
 }
 
-/* Typing text effect */
 function Typer({ text }: { text: string }) {
   const [s, setS] = useState("");
   const prev = useRef("");
@@ -19,7 +17,7 @@ function Typer({ text }: { text: string }) {
     if (text === prev.current) return;
     prev.current = text; setS("");
     let i = 0;
-    const delay = Math.max(8, Math.min(24, 1000 / text.length));
+    const delay = Math.max(8, Math.min(22, 900 / text.length));
     const tick = () => { if (i <= text.length) { setS(text.slice(0, i++)); setTimeout(tick, delay); } };
     tick();
   }, [text]);
@@ -49,59 +47,69 @@ export function AiReasoning({ analysis, loading }: { analysis: any; loading: boo
   const mc  = mul > 1.05 ? "var(--acid)" : mul < 0.95 ? "var(--red)" : "var(--t2)";
 
   return (
-    <section aria-label="Oracle Status" className="card accent-bar scanline" style={{ padding: "20px" }}>
+    <section aria-label="Oracle Status" className="card accent-bar scanline" style={{ padding: "22px" }}>
 
-      {/* ── Top bar ── */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-        <h2 style={{ fontFamily: "var(--sans)", fontSize: "14px", fontWeight: 700, letterSpacing: "0.04em", color: "var(--t1)", textTransform: "uppercase" }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "18px" }}>
+        <h2 style={{ fontFamily: "var(--sans)", fontSize: "15px", fontWeight: 700, letterSpacing: "-0.01em", color: "var(--t1)" }}>
           Oracle Status
         </h2>
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
           <span
             className={`live-dot${!online ? " dot-offline" : ""}`}
             role="status"
             aria-label={online ? "Oracle online" : "Oracle offline"}
           />
-          <span style={{ fontFamily: "var(--mono)", fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: online ? "var(--acid)" : "var(--red)" }}>
+          <span style={{ fontFamily: "var(--sans)", fontSize: "12px", fontWeight: 600, color: online ? "var(--acid)" : "var(--red)" }}>
             {online ? "Gemini · Live" : "Offline"}
           </span>
         </div>
       </div>
 
-      {/* ── Hero number ── */}
-      <div style={{ textAlign: "center", padding: "22px 0 18px", borderRadius: "8px", background: "var(--void)", border: `1px solid ${mc}20`, marginBottom: "14px" }}>
-        <p className="label" style={{ marginBottom: "8px", fontSize: "11px" }}>Current Multiplier</p>
-        <p className="num-xl" style={{ color: mc, letterSpacing: "-0.05em" }}>
-          {mul.toFixed(2)}<span style={{ fontSize: "24px", opacity: 0.5 }}>×</span>
+      {/* Hero multiplier */}
+      <div style={{
+        textAlign: "center", padding: "24px 16px 20px",
+        borderRadius: "10px", background: "var(--void)",
+        border: `1px solid ${mc}22`, marginBottom: "16px",
+      }}>
+        <p className="lbl" style={{ marginBottom: "10px", fontSize: "12px" }}>Current Multiplier</p>
+        <p className="n-hero" style={{ color: mc }}>
+          {mul.toFixed(2)}<span style={{ fontSize: "26px", opacity: 0.4 }}>×</span>
         </p>
         {analysis?.confidence !== undefined && (
-          <p style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "var(--t3)", marginTop: "8px" }}>
+          <p style={{ fontFamily: "var(--sans)", fontSize: "13px", color: "var(--t3)", marginTop: "10px" }}>
             Confidence: {analysis.confidence}%
           </p>
         )}
       </div>
 
-      {/* ── Stats row ── */}
+      {/* Stats */}
       {status && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px", marginBottom: "14px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "16px" }}>
           {([
-            { l: "Updates", v: String(status.totalUpdates) },
-            { l: "Uptime",  v: fmtUptime(status.uptimeMs) },
-            { l: "IDL",     v: status.programLoaded ? "Loaded" : "Err" },
+            { l: "Updates",  v: String(status.totalUpdates) },
+            { l: "Uptime",   v: fmtUptime(status.uptimeMs) },
+            { l: "Program",  v: status.programLoaded ? "OK" : "Err" },
           ] as const).map(({ l, v }) => (
-            <div key={l} style={{ background: "var(--raised)", border: "1px solid var(--line)", borderRadius: "6px", padding: "7px 10px", textAlign: "center" }}>
-              <p className="label" style={{ marginBottom: "3px", fontSize: "11px" }}>{l}</p>
-              <p style={{ fontFamily: "var(--mono)", fontSize: "13px", fontWeight: 700, color: "var(--t1)", fontVariantNumeric: "tabular-nums" }}>{v}</p>
+            <div key={l} style={{
+              background: "var(--raised)", border: "1px solid var(--border)",
+              borderRadius: "8px", padding: "10px 12px", textAlign: "center",
+            }}>
+              <p className="lbl" style={{ marginBottom: "4px", fontSize: "11px" }}>{l}</p>
+              <p style={{ fontFamily: "var(--mono)", fontSize: "14px", fontWeight: 700, color: "var(--t1)", fontVariantNumeric: "tabular-nums" }}>{v}</p>
             </div>
           ))}
         </div>
       )}
 
-      {/* ── Reasoning ── */}
-      <div style={{ marginBottom: "12px" }}>
-        <p className="label" style={{ marginBottom: "6px" }}>AI Reasoning</p>
-        <div style={{ background: "var(--void)", border: "1px solid var(--line)", borderRadius: "6px", padding: "11px 13px", minHeight: "62px" }}>
-          <p style={{ fontFamily: "var(--mono)", fontSize: "13px", lineHeight: "1.7", color: "var(--t2)", wordBreak: "break-word" }}>
+      {/* Reasoning */}
+      <div style={{ marginBottom: "14px" }}>
+        <p className="lbl" style={{ marginBottom: "8px" }}>AI Reasoning</p>
+        <div style={{
+          background: "var(--void)", border: "1px solid var(--border)",
+          borderRadius: "8px", padding: "14px 16px", minHeight: "72px",
+        }}>
+          <p style={{ fontFamily: "var(--sans)", fontSize: "14px", lineHeight: "1.65", color: "var(--t2)", wordBreak: "break-word" }}>
             {loading
               ? <span style={{ color: "var(--t3)" }}>Analyzing…</span>
               : <Typer text={analysis?.reasoning ?? "Waiting for signal…"} />
@@ -110,30 +118,32 @@ export function AiReasoning({ analysis, loading }: { analysis: any; loading: boo
         </div>
       </div>
 
-      {/* ── Hash ── */}
+      {/* Hash */}
       {analysis?.reasoningHash && (
-        <div style={{ marginBottom: "12px" }}>
-          <p className="label" style={{ marginBottom: "6px" }}>SHA-256 Proof</p>
-          <p className="truncate" style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--acid)", background: "var(--void)", border: "1px solid var(--line)", borderRadius: "6px", padding: "7px 12px" }}>
+        <div style={{ marginBottom: "14px" }}>
+          <p className="lbl" style={{ marginBottom: "7px" }}>SHA-256 Proof</p>
+          <p className="truncate" style={{
+            fontFamily: "var(--mono)", fontSize: "11px", color: "var(--acid)",
+            background: "var(--void)", border: "1px solid var(--border)",
+            borderRadius: "7px", padding: "9px 14px",
+          }}>
             {analysis.reasoningHash.slice(0, 20)}…{analysis.reasoningHash.slice(-10)}
           </p>
         </div>
       )}
 
-      {/* ── Footer ── */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "10px", borderTop: "1px solid var(--line)" }}>
-        <span style={{ fontFamily: "var(--mono)", fontSize: "9px", color: "var(--t3)" }}>
+      {/* Footer */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "12px", borderTop: "1px solid var(--border)" }}>
+        <span style={{ fontFamily: "var(--sans)", fontSize: "12px", color: "var(--t3)" }}>
           {analysis?.timestamp
             ? new Intl.DateTimeFormat("en", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(new Date(analysis.timestamp))
             : "—"}
         </span>
         {analysis?.txSignature && (
-          <a
-            href={`https://explorer.solana.com/tx/${analysis.txSignature}?cluster=devnet`}
+          <a href={`https://explorer.solana.com/tx/${analysis.txSignature}?cluster=devnet`}
             target="_blank" rel="noopener noreferrer"
-            style={{ fontFamily: "var(--mono)", fontSize: "9px", color: "var(--acid)", letterSpacing: "0.08em" }}
-            aria-label="View transaction on Solana Explorer"
-          >
+            style={{ fontFamily: "var(--sans)", fontSize: "12px", fontWeight: 600, color: "var(--acid)" }}
+            aria-label="View transaction on Solana Explorer">
             View TX ↗
           </a>
         )}

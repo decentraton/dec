@@ -18,13 +18,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#080c10" />
+        {/* Geist (display) + JetBrains Mono (data) */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Syne:wght@600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap"
           rel="stylesheet"
         />
-        {/* preconnect for devnet RPC */}
         <link rel="preconnect" href="https://api.devnet.solana.com" />
       </head>
       <body suppressHydrationWarning>

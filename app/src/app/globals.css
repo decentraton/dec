@@ -1,48 +1,51 @@
 @import "tailwindcss";
 
 /*
-  DePIN AI Oracle — v3 "Terminal Luxe"
-  Direction: Bloomberg Terminal × Bauhaus precision × data as art
-  Fonts: IBM Plex Mono (data) + system display
-  Palette: Near-black base, single acid-green accent, crisp whites
-  Unforgettable: Everything IS the data. Numbers are the hero.
+  DePIN AI Oracle — v4 "Devtools Luxe"
+  Fonts: Geist (display, UI) + JetBrains Mono (data, code)
+  Geist = Vercel's 2023 font, clean geometric, superb readability
+  JetBrains Mono = #1 developer mono, excellent at all sizes
+  Palette: Deep space dark + single acid-green accent
 */
 
-/* ── Color tokens ─────────────────────────────────────────── */
+/* ── Tokens ─────────────────────────────────────────────── */
 :root {
   --void:    #080c10;
   --base:    #0c1118;
-  --surface: #111820;
-  --raised:  #16202c;
-  --line:    rgba(255,255,255,0.07);
-  --line-hi: rgba(255,255,255,0.14);
+  --surface: #101821;
+  --raised:  #15202e;
+  --border:  rgba(255,255,255,0.08);
+  --border-h:rgba(255,255,255,0.16);
 
-  --acid:    #b8ff3c;   /* single punchy accent */
-  --acid-dim:#7aab21;
+  --acid:    #b8ff3c;
   --cyan:    #3cffd5;
   --red:     #ff3c5f;
   --amber:   #ffb347;
+  --purple:  #a78bfa;
 
-  --t1: #f0f4f0;        /* near-white text */
-  --t2: #7a9080;        /* secondary */
-  --t3: #3a5040;        /* dim */
+  /* Text scale — designed for actual readability */
+  --t1: #eef2ee;   /* primary — near-white with green tint */
+  --t2: #8ca898;   /* secondary — readable grey-green */
+  --t3: #4a6058;   /* dim — for labels */
 
-  --mono: 'IBM Plex Mono', 'Fira Code', 'Courier New', monospace;
-  --sans: 'Syne', 'Segoe UI', system-ui, sans-serif;
+  /* Fonts */
+  --sans: 'Geist', 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
 
-  --r: 10px;
-  --r-sm: 6px;
+  --r: 12px;
+  --r-sm: 8px;
 
   color-scheme: dark;
 }
 
-/* ── Reset ────────────────────────────────────────────────── */
+/* ── Reset ───────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html {
   background: var(--void);
   color: var(--t1);
-  font-family: var(--mono);
-  font-size: 15px;
+  font-family: var(--sans);
+  font-size: 16px;          /* ← base 16px, industry standard */
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -54,118 +57,124 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 a { color: inherit; text-decoration: none; }
-button { font-family: inherit; }
-::selection { background: rgba(184,255,60,0.2); color: var(--t1); }
+button { font-family: inherit; cursor: pointer; }
+::selection { background: rgba(184,255,60,0.22); color: var(--t1); }
 
-/* ── Background: subtle dot matrix ───────────────────────── */
+/* ── Background: dot matrix ─────────────────────────────── */
 body::before {
   content: '';
   position: fixed; inset: 0;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.030) 1px, transparent 1px);
+  background-size: 32px 32px;
   pointer-events: none; z-index: 0;
 }
 
-/* ── Layout wrapper ─────────────────────────────────────────*/
-.wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+/* ── Layout ──────────────────────────────────────────────── */
+.wrap { max-width: 1280px; margin: 0 auto; padding: 0 28px; }
 
-/* ── Card ──────────────────────────────────────────────────*/
+/* ── Card ────────────────────────────────────────────────── */
 .card {
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid var(--border);
   border-radius: var(--r);
-  position: relative;
-  overflow: hidden;
+  position: relative; overflow: hidden;
   transition: border-color 0.2s ease;
 }
-.card:hover { border-color: var(--line-hi); }
-.card--accent { border-color: rgba(184,255,60,0.18); }
+.card:hover { border-color: var(--border-h); }
 
-/* ── Hairline divider ───────────────────────────────────── */
-.hairline { height: 1px; background: var(--line); border: none; }
+.hairline { height: 1px; background: var(--border); border: none; }
 
-/* ── Label / eyebrow text ──────────────────────────────── */
-.label {
-  font-family: var(--mono);
+/* ── Typography helpers ──────────────────────────────────── */
+/* Section label — uppercase eyebrow */
+.lbl {
+  font-family: var(--sans);
   font-size: 11px;
-  letter-spacing: 0.10em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--t3);
+  display: block;
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Numeric display ───────────────────────────────────── */
-.num-xl {
+/* Mono numbers */
+.mono { font-family: var(--mono); }
+
+.n-hero {
   font-family: var(--mono);
-  font-size: 52px;
+  font-size: 56px;
   font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
-.num-lg {
+.n-xl {
   font-family: var(--mono);
-  font-size: 30px;
+  font-size: 34px;
   font-weight: 700;
   letter-spacing: -0.03em;
+  line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
-.num-md {
-  font-family: var(--mono); font-size: 20px; font-weight: 700;
-  letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+.n-lg {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
-/* ── Acid accent bar (top of cards) ────────────────────── */
+/* ── Accent top bar ──────────────────────────────────────── */
 .accent-bar::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: var(--acid);
-  opacity: 0.7;
+  background: var(--acid); opacity: 0.75;
+  border-radius: 12px 12px 0 0;
 }
 
-/* ── Live dot ───────────────────────────────────────────── */
+/* ── Live dot ────────────────────────────────────────────── */
 .live-dot {
   display: inline-block;
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--acid);
-  animation: blink 2s ease-in-out infinite;
-  flex-shrink: 0;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--acid); flex-shrink: 0;
+  animation: blink 2.2s ease-in-out infinite;
 }
-@keyframes blink {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(184,255,60,0); }
-  50%       { opacity: .6; box-shadow: 0 0 0 4px rgba(184,255,60,0); }
-}
-
-/* ── Status indicator (offline = red) ───────────────────── */
 .dot-offline { background: var(--red) !important; animation: none !important; }
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
 
-/* ── Scan line sweep ────────────────────────────────────── */
+/* ── Scan sweep ──────────────────────────────────────────── */
 .scanline { overflow: hidden; }
 .scanline::after {
   content: '';
-  position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(184,255,60,0.03) 50%, transparent);
-  animation: scan 6s ease-in-out infinite;
+  position: absolute; top: 0; left: -60%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(184,255,60,0.025) 50%, transparent);
+  animation: scan 7s ease-in-out infinite;
   pointer-events: none;
 }
 @keyframes scan { 0% { left: -60%; } 100% { left: 110%; } }
 
-/* ── Reveal animations ──────────────────────────────────── */
+/* ── Reveal animations ───────────────────────────────────── */
 @media (prefers-reduced-motion: no-preference) {
-  @keyframes up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-  .r1 { animation: up 0.45s ease-out 0.05s both; }
-  .r2 { animation: up 0.45s ease-out 0.12s both; }
-  .r3 { animation: up 0.45s ease-out 0.20s both; }
-  .r4 { animation: up 0.45s ease-out 0.28s both; }
-  .r5 { animation: up 0.45s ease-out 0.36s both; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .r1 { animation: rise .5s ease-out .05s both; }
+  .r2 { animation: rise .5s ease-out .13s both; }
+  .r3 { animation: rise .5s ease-out .22s both; }
+  .r4 { animation: rise .5s ease-out .31s both; }
+  .r5 { animation: rise .5s ease-out .40s both; }
 }
 
-/* ── Buttons ────────────────────────────────────────────── */
+/* ── Buttons ─────────────────────────────────────────────── */
 .btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 0 18px; height: 36px;
-  font-family: var(--mono); font-size: 11px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 0 20px; height: 38px;
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  letter-spacing: 0.01em;
   border-radius: var(--r-sm); border: none; cursor: pointer;
   transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
   white-space: nowrap;
@@ -173,65 +182,72 @@ body::before {
 }
 .btn:focus-visible { outline: 2px solid var(--acid); outline-offset: 2px; }
 .btn:active { transform: scale(0.97); }
-.btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
+.btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none !important; }
 
 .btn-acid {
-  background: var(--acid);
-  color: #000;
+  background: var(--acid); color: #060e06; font-weight: 700;
 }
-.btn-acid:hover:not(:disabled) { opacity: 0.88; box-shadow: 0 0 20px rgba(184,255,60,0.28); }
+.btn-acid:hover:not(:disabled) { opacity: 0.88; box-shadow: 0 0 22px rgba(184,255,60,0.3); }
 
 .btn-ghost {
-  background: transparent;
-  color: var(--acid);
-  border: 1px solid rgba(184,255,60,0.3);
+  background: transparent; color: var(--acid);
+  border: 1px solid rgba(184,255,60,0.35);
 }
-.btn-ghost:hover:not(:disabled) { background: rgba(184,255,60,0.07); border-color: rgba(184,255,60,0.6); }
+.btn-ghost:hover:not(:disabled) { background: rgba(184,255,60,0.08); border-color: rgba(184,255,60,0.65); }
 
 .btn-dim {
-  background: var(--raised);
-  color: var(--t2);
-  border: 1px solid var(--line);
+  background: var(--raised); color: var(--t2);
+  border: 1px solid var(--border);
 }
-.btn-dim:hover:not(:disabled) { color: var(--t1); border-color: var(--line-hi); background: #1d2836; }
+.btn-dim:hover:not(:disabled) { color: var(--t1); border-color: var(--border-h); background: #1d2836; }
+
+.btn-active {
+  background: rgba(184,255,60,0.12); color: var(--acid);
+  border: 1px solid rgba(184,255,60,0.45);
+}
 
 /* ── Tag / badge ─────────────────────────────────────────── */
 .tag {
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.10em; text-transform: uppercase;
-  padding: 2px 7px; border-radius: 3px; display: inline-flex; align-items: center; gap: 3px;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--sans); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 4px;
+  display: inline-flex; align-items: center; gap: 4px;
 }
-.tag-acid   { background: rgba(184,255,60,0.10); color: var(--acid);  border: 1px solid rgba(184,255,60,0.22); }
-.tag-cyan   { background: rgba(60,255,213,0.10); color: var(--cyan);   border: 1px solid rgba(60,255,213,0.22); }
-.tag-red    { background: rgba(255,60,95,0.10);  color: var(--red);    border: 1px solid rgba(255,60,95,0.22); }
-.tag-amber  { background: rgba(255,179,71,0.10); color: var(--amber);  border: 1px solid rgba(255,179,71,0.22); }
-.tag-dim    { background: rgba(255,255,255,0.04); color: var(--t2);    border: 1px solid var(--line); }
+.tag-acid   { background: rgba(184,255,60,0.10); color: var(--acid);   border: 1px solid rgba(184,255,60,0.24); }
+.tag-cyan   { background: rgba(60,255,213,0.10); color: var(--cyan);   border: 1px solid rgba(60,255,213,0.24); }
+.tag-red    { background: rgba(255,60,95,0.10);  color: var(--red);    border: 1px solid rgba(255,60,95,0.24); }
+.tag-amber  { background: rgba(255,179,71,0.10); color: var(--amber);  border: 1px solid rgba(255,179,71,0.24); }
+.tag-dim    { background: rgba(255,255,255,0.04); color: var(--t2);    border: 1px solid var(--border); }
 
-/* ── Wallet button overrides ─────────────────────────────── */
+/* ── Wallet adapter ──────────────────────────────────────── */
 .wallet-adapter-button {
-  font-family: var(--mono) !important;
-  font-size: 11px !important; font-weight: 700 !important; letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
-  padding: 0 16px !important; height: 36px !important;
+  font-family: var(--sans) !important;
+  font-size: 13px !important; font-weight: 600 !important;
+  padding: 0 18px !important; height: 38px !important;
   background: var(--raised) !important;
-  border: 1px solid var(--line-hi) !important;
+  border: 1px solid var(--border-h) !important;
   border-radius: var(--r-sm) !important;
   color: var(--acid) !important;
   transition: background 0.15s ease, box-shadow 0.15s ease !important;
+  letter-spacing: 0 !important;
 }
-.wallet-adapter-button:hover { background: rgba(184,255,60,0.07) !important; box-shadow: 0 0 16px rgba(184,255,60,0.2) !important; }
+.wallet-adapter-button:hover {
+  background: rgba(184,255,60,0.08) !important;
+  box-shadow: 0 0 18px rgba(184,255,60,0.22) !important;
+}
 .wallet-adapter-button:focus-visible { outline: 2px solid var(--acid) !important; outline-offset: 2px !important; }
 .wallet-adapter-button-trigger { background: var(--raised) !important; }
 
 /* ── Scrollbar ───────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 3px; height: 3px; }
 ::-webkit-scrollbar-track { background: var(--void); }
-::-webkit-scrollbar-thumb { background: rgba(184,255,60,0.25); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: rgba(184,255,60,0.22); border-radius: 2px; }
 
 /* ── Recharts ────────────────────────────────────────────── */
-.recharts-text { fill: var(--t3) !important; font-family: var(--mono) !important; font-size: 9px !important; letter-spacing: 0.06em !important; }
+.recharts-text { fill: var(--t3) !important; font-family: var(--mono) !important; font-size: 11px !important; }
 .recharts-cartesian-grid line { stroke: rgba(255,255,255,0.04) !important; }
+.recharts-tooltip-wrapper { z-index: 999; }
 
-/* ── util ────────────────────────────────────────────────── */
+/* ── Utils ───────────────────────────────────────────────── */
 .truncate { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .min-w-0  { min-width: 0; }

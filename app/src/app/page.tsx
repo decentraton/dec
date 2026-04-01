@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { KpiBar }          from "../components/kpi-bar";
-import { GpuMarketplace }  from "../components/gpu-marketplace";
-import { AiReasoning }     from "../components/ai-reasoning";
-import { PriceChart }      from "../components/price-chart";
-import { DemoControls }    from "../components/demo-controls";
+import { KpiBar }         from "../components/kpi-bar";
+import { GpuMarketplace } from "../components/gpu-marketplace";
+import { AiReasoning }    from "../components/ai-reasoning";
+import { PriceChart }     from "../components/price-chart";
+import { DemoControls }   from "../components/demo-controls";
 
 const WalletBtn = dynamic(
   async () => (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
@@ -26,8 +26,7 @@ export default function Home() {
       const r = await fetch(`${API}/api/current-analysis`);
       if (!r.ok) { setAgentOnline(false); return; }
       const d = await r.json();
-      setAnalysis(d);
-      setAgentOnline(true);
+      setAnalysis(d); setAgentOnline(true);
       if (Array.isArray(d.history)) setHistory(d.history);
     } catch { setAgentOnline(false); }
   };
@@ -36,27 +35,27 @@ export default function Home() {
 
   return (
     <>
-      {/* ═══ HEADER ═══════════════════════════════════════════ */}
+      {/* ═══ HEADER ═══════════════════════════════════════════════ */}
       <header style={{
         position: "sticky", top: 0, zIndex: 50,
-        borderBottom: "1px solid var(--line)",
-        backdropFilter: "blur(18px) saturate(1.6)",
-        background: "rgba(8,12,16,0.85)",
+        borderBottom: "1px solid var(--border)",
+        backdropFilter: "blur(20px) saturate(1.5)",
+        background: "rgba(8,12,16,0.88)",
       }}>
-        <div className="wrap" style={{ height: "56px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
+        <div className="wrap" style={{ height: "58px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
 
           {/* Logo */}
-          <a href="/" style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0, textDecoration: "none" }}
-            aria-label="DePIN AI Oracle — home">
-            <svg aria-hidden="true" width="30" height="30" viewBox="0 0 30 30" fill="none">
-              <rect width="30" height="30" rx="8" fill="#b8ff3c" />
-              <path d="M16 5L6 18h9l-1 7 10-13h-9l1-7z" fill="#080c10" />
+          <a href="/" aria-label="DePIN AI Oracle — home"
+            style={{ display: "flex", alignItems: "center", gap: "11px", flexShrink: 0 }}>
+            <svg aria-hidden="true" width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="9" fill="var(--acid)" />
+              <path d="M17 4L7 19h10l-1 9 11-14H17l1-10z" fill="#060e06" />
             </svg>
             <div>
-              <p style={{ fontFamily: "var(--sans)", fontWeight: 800, fontSize: "14px", letterSpacing: "-0.02em", color: "var(--t1)", lineHeight: 1.1 }}>
+              <p style={{ fontFamily: "var(--sans)", fontWeight: 800, fontSize: "15px", letterSpacing: "-0.03em", color: "var(--t1)", lineHeight: 1.1 }}>
                 DePIN AI Oracle
               </p>
-              <p style={{ fontFamily: "var(--mono)", fontSize: "8px", color: "var(--t3)", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+              <p style={{ fontFamily: "var(--sans)", fontSize: "11px", fontWeight: 400, color: "var(--t3)", marginTop: "1px" }}>
                 GPU Pricing Network
               </p>
             </div>
@@ -64,19 +63,20 @@ export default function Home() {
 
           {/* Nav */}
           <nav aria-label="Primary navigation" style={{ display: "flex", gap: "2px", flex: 1, justifyContent: "center" }}>
-            {([ ["Dashboard", "#"],
-                ["Explorer", `https://explorer.solana.com/address/36rS72Rgx7WesAjwv2cernhGDHBWXZuS3wpCTJVwULPj?cluster=devnet`],
-                ["GitHub",   "https://github.com/decentraton/dec"] ] as const).map(([label, href]) => (
+            {([
+              ["Dashboard",  "#"],
+              ["Explorer",   `https://explorer.solana.com/address/36rS72Rgx7WesAjwv2cernhGDHBWXZuS3wpCTJVwULPj?cluster=devnet`],
+              ["GitHub",     "https://github.com/decentraton/dec"],
+            ] as const).map(([label, href]) => (
               <a key={label} href={href}
                 target={href.startsWith("http") ? "_blank" : "_self"}
                 rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
                 style={{
-                  fontFamily: "var(--mono)", textTransform: "uppercase",
-                  letterSpacing: "0.08em", padding: "5px 12px", borderRadius: "5px",
-                  color: label === "Dashboard" ? "var(--acid)" : "var(--t3)",
-                  background: label === "Dashboard" ? "rgba(184,255,60,0.08)" : "transparent",
-                  transition: "color 0.15s ease",
-                  textDecoration: "none", fontSize: "12px",
+                  fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 500,
+                  padding: "6px 14px", borderRadius: "7px",
+                  color: label === "Dashboard" ? "var(--acid)" : "var(--t2)",
+                  background: label === "Dashboard" ? "rgba(184,255,60,0.09)" : "transparent",
+                  transition: "color 0.15s ease, background 0.15s ease",
                 }}>
                 {label}
               </a>
@@ -84,11 +84,11 @@ export default function Home() {
           </nav>
 
           {/* Status + wallet */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
             <div role="status" aria-live="polite" aria-label={agentOnline ? "Agent online" : "Agent offline"}
-              style={{ display: "flex", alignItems: "center", gap: "5px", padding: "4px 10px", borderRadius: "5px", background: "var(--surface)", border: "1px solid var(--line)" }}>
+              style={{ display: "flex", alignItems: "center", gap: "7px", padding: "5px 12px", borderRadius: "7px", background: "var(--surface)", border: "1px solid var(--border)" }}>
               <span className={`live-dot${!agentOnline ? " dot-offline" : ""}`} aria-hidden="true" />
-              <span style={{ fontFamily: "var(--mono)", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.1em", color: agentOnline ? "var(--acid)" : "var(--red)" }}>
+              <span style={{ fontFamily: "var(--sans)", fontSize: "12px", fontWeight: 600, color: agentOnline ? "var(--acid)" : "var(--red)" }}>
                 {agentOnline ? "Live" : "Offline"}
               </span>
             </div>
@@ -97,69 +97,76 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ═══ MAIN ═════════════════════════════════════════════ */}
-      <main id="main-content" className="wrap" style={{ paddingTop: "48px", paddingBottom: "80px" }}>
+      {/* ═══ MAIN ═════════════════════════════════════════════════ */}
+      <main id="main-content" className="wrap" style={{ paddingTop: "52px", paddingBottom: "88px" }}>
 
-        {/* ── HERO ─────────────────────────────────────────── */}
-        <section aria-label="Introduction" className="r1" style={{ marginBottom: "36px" }}>
-          {/* Eyebrow ticker */}
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "4px 10px 4px 6px", borderRadius: "20px", border: "1px solid rgba(184,255,60,0.2)", background: "rgba(184,255,60,0.05)", marginBottom: "16px" }}>
+        {/* HERO */}
+        <section aria-label="Introduction" className="r1" style={{ marginBottom: "40px" }}>
+          {/* Eyebrow */}
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: "8px",
+            padding: "5px 12px 5px 8px", borderRadius: "100px",
+            border: "1px solid rgba(184,255,60,0.22)",
+            background: "rgba(184,255,60,0.06)", marginBottom: "20px",
+          }}>
             <span className="live-dot" aria-hidden="true" />
-            <span style={{ fontFamily: "var(--mono)", fontSize: "9px", color: "var(--acid)", textTransform: "uppercase", letterSpacing: "0.12em" }}>
-              Autonomous AI · Solana Devnet · Real-Time
+            <span style={{ fontFamily: "var(--sans)", fontSize: "12px", fontWeight: 500, color: "var(--acid)" }}>
+              Autonomous AI · Solana Devnet · Real-Time Pricing
             </span>
           </div>
 
           <h1 style={{
             fontFamily: "var(--sans)", fontWeight: 800,
-            fontSize: "clamp(36px, 5vw, 64px)",
+            fontSize: "clamp(40px, 5.5vw, 68px)",
             letterSpacing: "-0.04em", lineHeight: 1.0,
-            color: "var(--t1)",
-            textWrap: "balance",
+            color: "var(--t1)", textWrap: "balance",
           }}>
             Dynamic GPU Pricing<br />
             <span style={{ color: "var(--acid)" }}>Powered by AI</span>
           </h1>
 
           <p style={{
-            fontFamily: "var(--mono)", fontSize: "14px",
-            color: "var(--t2)", marginTop: "16px",
-            maxWidth: "520px", lineHeight: "1.7",
+            fontFamily: "var(--sans)", fontSize: "16px", fontWeight: 400,
+            color: "var(--t2)", marginTop: "18px",
+            maxWidth: "540px", lineHeight: "1.7",
           }}>
             Gemini AI autonomously adjusts GPU rental prices every 60 s based on real
             market signals. Every decision is SHA-256 hashed and recorded on Solana.
           </p>
 
-          {/* Stat pills */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "20px" }}>
+          {/* Info pills */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "24px" }}>
             {[
               { l: "Program",  v: "36rS72…ULPj" },
               { l: "Network",  v: "Solana Devnet" },
               { l: "AI Model", v: "Gemini 1.5 Flash" },
               { l: "Interval", v: "Every 60 s" },
             ].map(({ l, v }) => (
-              <div key={l} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px 11px", borderRadius: "5px", background: "var(--surface)", border: "1px solid var(--line)" }}>
-                <span style={{ fontFamily: "var(--mono)", fontSize: "8px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.1em" }}>{l}</span>
-                <span style={{ fontFamily: "var(--mono)", fontSize: "9px", color: "var(--t1)" }}>{v}</span>
+              <div key={l} style={{
+                display: "flex", alignItems: "center", gap: "8px",
+                padding: "5px 13px", borderRadius: "7px",
+                background: "var(--surface)", border: "1px solid var(--border)",
+              }}>
+                <span style={{ fontFamily: "var(--sans)", fontSize: "11px", fontWeight: 600, color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{l}</span>
+                <span style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "var(--t1)" }}>{v}</span>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ── KPIs ─────────────────────────────────────────── */}
+        {/* KPIs */}
         <KpiBar />
 
-        {/* ── TWO-COLUMN GRID ──────────────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "16px", alignItems: "start" }}>
-
-          {/* LEFT */}
+        {/* 2-COLUMN GRID */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 356px", gap: "16px", alignItems: "start" }}>
+          {/* Left */}
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div className="r3"><PriceChart history={history} /></div>
             <div className="r4"><GpuMarketplace /></div>
           </div>
 
-          {/* RIGHT — sticky sidebar */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", position: "sticky", top: "72px" }}>
+          {/* Right sticky sidebar */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", position: "sticky", top: "74px" }}>
             <div className="r2"><AiReasoning analysis={analysis} loading={loading} /></div>
             <div className="r3">
               <DemoControls onUpdate={() => {
@@ -168,54 +175,52 @@ export default function Home() {
               }} />
             </div>
 
-            {/* On-chain info box */}
-            <div className="card r4" style={{ padding: "14px 16px" }}>
-              <p className="label" style={{ marginBottom: "10px" }}>On-Chain Info</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                {[
-                  { l: "Program ID",  v: "36rS72…ULPj", href: "https://explorer.solana.com/address/36rS72Rgx7WesAjwv2cernhGDHBWXZuS3wpCTJVwULPj?cluster=devnet" },
-                  { l: "Cluster",     v: "Devnet", href: null },
-                  { l: "Framework",   v: "Anchor 0.30.1", href: null },
-                  { l: "Rust",        v: "1.75.0 (strict)", href: null },
-                ].map(({ l, v, href }) => (
-                  <div key={l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: "1px solid var(--line)" }}>
-                    <span className="label" style={{ fontSize: "8px" }}>{l}</span>
-                    {href ? (
-                      <a href={href} target="_blank" rel="noopener noreferrer"
-                        style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--acid)", textDecoration: "none" }}>
-                        {v} ↗
-                      </a>
-                    ) : (
-                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t2)" }}>{v}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
+            {/* On-chain info */}
+            <div className="card r4" style={{ padding: "16px 18px" }}>
+              <p className="lbl" style={{ marginBottom: "12px" }}>On-Chain Info</p>
+              {[
+                { l: "Program ID", v: "36rS72…ULPj", href: "https://explorer.solana.com/address/36rS72Rgx7WesAjwv2cernhGDHBWXZuS3wpCTJVwULPj?cluster=devnet" },
+                { l: "Cluster",    v: "Devnet",        href: null },
+                { l: "Framework",  v: "Anchor 0.30.1", href: null },
+                { l: "Rust",       v: "1.75.0",        href: null },
+              ].map(({ l, v, href }) => (
+                <div key={l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
+                  <span style={{ fontFamily: "var(--sans)", fontSize: "12px", fontWeight: 500, color: "var(--t3)" }}>{l}</span>
+                  {href ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer"
+                      style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "var(--acid)", fontWeight: 600 }}>
+                      {v} ↗
+                    </a>
+                  ) : (
+                    <span style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "var(--t2)" }}>{v}</span>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </main>
 
-      {/* ═══ FOOTER ═══════════════════════════════════════════ */}
-      <footer style={{ borderTop: "1px solid var(--line)", marginTop: "0" }}>
-        <div className="wrap" style={{ padding: "18px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 30 30" fill="none">
-              <rect width="30" height="30" rx="6" fill="rgba(184,255,60,0.15)" />
-              <path d="M16 5L6 18h9l-1 7 10-13h-9l1-7z" fill="var(--acid)" />
+      {/* FOOTER */}
+      <footer style={{ borderTop: "1px solid var(--border)" }}>
+        <div className="wrap" style={{ padding: "20px 0", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="7" fill="rgba(184,255,60,0.12)" />
+              <path d="M17 4L7 19h10l-1 9 11-14H17l1-10z" fill="var(--acid)" />
             </svg>
-            <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)" }}>
+            <span style={{ fontFamily: "var(--sans)", fontSize: "13px", color: "var(--t3)" }}>
               DePIN AI Oracle · Solana Hackathon 2025
             </span>
           </div>
-          <div style={{ display: "flex", gap: "16px" }}>
+          <div style={{ display: "flex", gap: "20px" }}>
             {[
               { l: "Explorer", href: "https://explorer.solana.com/address/36rS72Rgx7WesAjwv2cernhGDHBWXZuS3wpCTJVwULPj?cluster=devnet" },
               { l: "GitHub",   href: "https://github.com/decentraton/dec" },
             ].map(({ l, href }) => (
               <a key={l} href={href} target="_blank" rel="noopener noreferrer"
-                style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)", letterSpacing: "0.06em", transition: "color 0.15s ease", textDecoration: "none" }}
-                aria-label={`Open ${l} in new tab`}>
+                aria-label={`Open ${l} in new tab`}
+                style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 500, color: "var(--t3)", transition: "color 0.15s ease" }}>
                 {l} ↗
               </a>
             ))}
