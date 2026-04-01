@@ -2,33 +2,25 @@
 
 import { useMemo } from "react";
 import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceLine,
-  defs,
-  linearGradient,
-  stop,
+  AreaChart, Area, XAxis, YAxis,
+  CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from "recharts";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload || !payload.length) return null;
+  if (!active || !payload?.length) return null;
   return (
-    <div className="mono" style={{
-      background: "var(--bg-card)",
-      border: "1px solid var(--bg-border-active)",
-      borderRadius: "8px",
-      padding: "10px 14px",
-      fontSize: "11px",
+    <div style={{
+      background: "var(--surface)", border: "1px solid var(--line-hi)",
+      borderRadius: "6px", padding: "9px 13px",
+      fontFamily: "var(--mono)", fontSize: "10px",
+      boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
     }}>
-      <p style={{ color: "var(--text-secondary)", marginBottom: "4px" }}>{label}</p>
+      <p style={{ color: "var(--t3)", marginBottom: "5px", letterSpacing: "0.06em" }}>{label}</p>
       {payload.map((p: any) => (
-        <p key={p.dataKey} style={{ color: p.stroke }}>
-          {p.dataKey === "price" ? `${p.value.toFixed(3)}× multiplier` : `$${p.value.toFixed(2)} SOL`}
+        <p key={p.dataKey} style={{ color: p.stroke, fontVariantNumeric: "tabular-nums" }}>
+          {p.dataKey === "price"
+            ? `${Number(p.value).toFixed(3)}× multiplier`
+            : `$${Number(p.value).toFixed(2)} SOL`}
         </p>
       ))}
     </div>
@@ -37,113 +29,83 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export function PriceChart({ history }: { history: any[] }) {
   const data = useMemo(() => {
-    if (!history || history.length === 0) {
-      return [{ time: "Now", price: 1.0 }];
-    }
-    return history.map((entry) => ({
-      time: new Date(entry.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      price: entry.multiplier,
-      solPrice: entry.solPrice ?? null,
+    if (!history?.length) return [{ time: "Now", price: 1, sol: null as number | null }];
+    return history.map(e => ({
+      time: new Intl.DateTimeFormat("en", { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(e.timestamp)),
+      price: e.multiplier as number,
+      sol: (e.solPrice ?? null) as number | null,
     }));
   }, [history]);
 
-  const hasSolData = data.some((d) => d.solPrice !== null);
+  const hasSol = data.some(d => d.sol !== null);
 
   return (
-    <div className="glass-card neon-top p-6 anim-4" style={{ height: "340px" }}>
-      <div className="flex justify-between items-start mb-6">
+    <section aria-label="Price multiplier history chart" className="card accent-bar" style={{ padding: "20px 20px 12px" }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "20px" }}>
         <div>
-          <h3 style={{ fontSize: "18px", color: "var(--text-primary)" }}>Price Multiplier History</h3>
-          <p className="mono text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
-            AI-driven multiplier · {data.length} data points
+          <h2 style={{ fontFamily: "var(--sans)", fontSize: "18px", fontWeight: 800, letterSpacing: "-0.02em", color: "var(--t1)", marginBottom: "3px" }}>
+            Multiplier History
+          </h2>
+          <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)", fontVariantNumeric: "tabular-nums" }}>
+            AI-driven · {data.length} data points
           </p>
         </div>
-        <div className="flex gap-4 mono text-[10px]">
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-0.5 rounded" style={{ background: "var(--neon-green)" }} />
-            <span style={{ color: "var(--text-secondary)" }}>Multiplier</span>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <div style={{ width: "20px", height: "2px", background: "var(--acid)", borderRadius: "1px" }} aria-hidden="true" />
+            <span style={{ fontFamily: "var(--mono)", fontSize: "9px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Multiplier</span>
           </div>
-          {hasSolData && (
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-0.5 rounded" style={{ background: "var(--neon-blue)" }} />
-              <span style={{ color: "var(--text-secondary)" }}>SOL Price</span>
+          {hasSol && (
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                <div style={{ width: "20px", height: "1px", background: "var(--cyan)", borderRadius: "1px", borderTop: "1px dashed var(--cyan)" }} aria-hidden="true" />
+              <span style={{ fontFamily: "var(--mono)", fontSize: "9px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.08em" }}>SOL/USD</span>
             </div>
           )}
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height="80%">
-        <AreaChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-          <defs>
-            <linearGradient id="greenGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00ffb4" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#00ffb4" stopOpacity={0.01} />
-            </linearGradient>
-            <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00b4ff" stopOpacity={0.15} />
-              <stop offset="100%" stopColor="#00b4ff" stopOpacity={0.01} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="4 8" stroke="rgba(0,255,180,0.05)" />
-          <XAxis
-            dataKey="time"
-            stroke="transparent"
-            tick={{ fill: "var(--text-dim)", fontSize: 10, fontFamily: "'Space Mono', monospace" }}
-            tickLine={false}
-          />
-          <YAxis
-            yAxisId="left"
-            stroke="transparent"
-            tick={{ fill: "var(--text-dim)", fontSize: 10, fontFamily: "'Space Mono', monospace" }}
-            tickLine={false}
-            domain={[0.4, 3.2]}
-            tickFormatter={(v: number) => `${v}×`}
-          />
-          {hasSolData && (
-            <YAxis
-              yAxisId="right"
-              orientation="right"
-              stroke="transparent"
-              tick={{ fill: "var(--text-dim)", fontSize: 10, fontFamily: "'Space Mono', monospace" }}
-              tickLine={false}
-              tickFormatter={(v: number) => `$${v}`}
-            />
-          )}
-          <ReferenceLine
-            yAxisId="left"
-            y={1.0}
-            stroke="rgba(255,255,255,0.1)"
-            strokeDasharray="6 4"
-            label={{ value: "1.0× base", fill: "var(--text-dim)", fontSize: 9, fontFamily: "'Space Mono', monospace" }}
-          />
-          <Tooltip content={<CustomTooltip />} />
-          <Area
-            yAxisId="left"
-            type="monotone"
-            dataKey="price"
-            stroke="var(--neon-green)"
-            strokeWidth={2.5}
-            fill="url(#greenGradient)"
-            dot={false}
-            activeDot={{ r: 5, fill: "var(--neon-green)", strokeWidth: 0 }}
-            animationDuration={800}
-          />
-          {hasSolData && (
-            <Area
-              yAxisId="right"
-              type="monotone"
-              dataKey="solPrice"
-              stroke="var(--neon-blue)"
-              strokeWidth={1.5}
-              fill="url(#blueGradient)"
-              dot={false}
-              activeDot={{ r: 4, fill: "var(--neon-blue)", strokeWidth: 0 }}
-              strokeDasharray="4 2"
-              animationDuration={800}
-            />
-          )}
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
+      {/* Chart */}
+      <div style={{ height: "240px" }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data} margin={{ top: 4, right: hasSol ? 40 : 4, left: -8, bottom: 0 }}>
+            <defs>
+              <linearGradient id="gAcid" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#b8ff3c" stopOpacity={0.22} />
+                <stop offset="100%" stopColor="#b8ff3c" stopOpacity={0.01} />
+              </linearGradient>
+              <linearGradient id="gCyan" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#3cffd5" stopOpacity={0.14} />
+                <stop offset="100%" stopColor="#3cffd5" stopOpacity={0.01} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="4 8" stroke="rgba(255,255,255,0.04)" />
+            <XAxis dataKey="time" stroke="transparent" tickLine={false}
+              tick={{ fill: "var(--t3)", fontSize: 9, fontFamily: "'IBM Plex Mono',monospace", letterSpacing: "0.04em" }} />
+            <YAxis yAxisId="m" stroke="transparent" tickLine={false} domain={[0.3, 3.2]}
+              tickFormatter={(v: number) => `${v.toFixed(1)}×`}
+              tick={{ fill: "var(--t3)", fontSize: 9, fontFamily: "'IBM Plex Mono',monospace" }} />
+            {hasSol && (
+              <YAxis yAxisId="s" orientation="right" stroke="transparent" tickLine={false}
+                tickFormatter={(v: number) => `$${v}`}
+                tick={{ fill: "var(--t3)", fontSize: 9, fontFamily: "'IBM Plex Mono',monospace" }} />
+            )}
+            <ReferenceLine yAxisId="m" y={1}
+              stroke="rgba(255,255,255,0.08)" strokeDasharray="6 4"
+              label={{ value: "1.0× base", fill: "var(--t3)", fontSize: 8, fontFamily: "'IBM Plex Mono',monospace" }} />
+            <Tooltip content={<CustomTooltip />} />
+            <Area yAxisId="m" type="monotone" dataKey="price"
+              stroke="var(--acid)" strokeWidth={2} fill="url(#gAcid)"
+              dot={false} activeDot={{ r: 4, fill: "var(--acid)", strokeWidth: 0 }} animationDuration={700} />
+            {hasSol && (
+              <Area yAxisId="s" type="monotone" dataKey="sol"
+                stroke="var(--cyan)" strokeWidth={1.5} fill="url(#gCyan)"
+                strokeDasharray="4 3" dot={false}
+                activeDot={{ r: 3, fill: "var(--cyan)", strokeWidth: 0 }} animationDuration={700} />
+            )}
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </section>
   );
 }

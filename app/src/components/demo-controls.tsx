@@ -4,172 +4,109 @@ import { useState } from "react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-interface DemoControlsProps {
-  onUpdate: () => void;
-}
-
 const EVENTS = [
-  {
-    key: "gpu_shortage",
-    label: "GPU Shortage",
-    desc: "NVIDIA supply chain disruption",
-    icon: "⚡",
-    expectedDir: "up",
-    color: "var(--neon-red)",
-    bg: "rgba(255,71,87,0.06)",
-  },
-  {
-    key: "bull_run",
-    label: "Bull Run",
-    desc: "Bitcoin AT H, AI tokens +40%",
-    icon: "🚀",
-    expectedDir: "up",
-    color: "var(--neon-green)",
-    bg: "rgba(0,255,180,0.06)",
-  },
-  {
-    key: "low_demand",
-    label: "Low Demand",
-    desc: "Market correction, tech down 15%",
-    icon: "↓",
-    expectedDir: "down",
-    color: "var(--neon-blue)",
-    bg: "rgba(0,180,255,0.06)",
-  },
-];
+  { key: "gpu_shortage", label: "GPU Shortage", desc: "NVIDIA supply disruption · scarcity signal", dir: "↑", c: "var(--red)" },
+  { key: "bull_run",     label: "Bull Run",     desc: "BTC ATH · AI demand surge +40%",          dir: "↑", c: "var(--acid)" },
+  { key: "low_demand",   label: "Low Demand",   desc: "Market correction · compute down 15%",     dir: "↓", c: "var(--cyan)" },
+] as const;
 
-export function DemoControls({ onUpdate }: DemoControlsProps) {
+export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
   const [loading, setLoading] = useState<string | null>(null);
-  const [lastResult, setLastResult] = useState<{ event: string; multiplier: number; tx: string | null } | null>(null);
+  const [last, setLast]       = useState<{ event: string; mul: number; tx: string | null } | null>(null);
 
-  const trigger = async (eventKey: string) => {
-    setLoading(eventKey);
-    setLastResult(null);
+  const fire = async (key: string, url: string, method = "POST") => {
+    setLoading(key); setLast(null);
     try {
-      const res = await fetch(`${API_BASE}/api/simulate/${eventKey}`, { method: "POST" });
-      const data = await res.json();
-      if (res.ok && data.multiplier !== undefined) {
-        setLastResult({ event: eventKey, multiplier: data.multiplier, tx: data.txSignature });
-        onUpdate();
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(null);
-    }
+      const r = await fetch(`${API_BASE}${url}`, { method });
+      const d = await r.json();
+      if (r.ok && d.multiplier !== undefined) { setLast({ event: key, mul: d.multiplier, tx: d.txSignature }); onUpdate(); }
+    } catch {}
+    finally { setLoading(null); }
   };
 
-  const triggerOrganic = async () => {
-    setLoading("organic");
-    setLastResult(null);
-    try {
-      const res = await fetch(`${API_BASE}/api/trigger-update`, { method: "POST" });
-      const data = await res.json();
-      if (res.ok && data.multiplier !== undefined) {
-        setLastResult({ event: "organic", multiplier: data.multiplier, tx: data.txSignature });
-        onUpdate();
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(null);
-    }
-  };
+  const Spinner = () => (
+    <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" style={{ animation: "spin 1s linear infinite" }}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeDasharray="40" strokeDashoffset="15" />
+    </svg>
+  );
 
   return (
-    <div className="glass-card p-5 anim-6">
-      <div className="flex items-center justify-between mb-5">
-        <div>
-          <h2 style={{ fontSize: "18px", color: "var(--text-primary)" }}>Market Simulator</h2>
-          <p className="mono text-xs mt-1" style={{ color: "var(--text-secondary)" }}>Trigger AI oracle updates manually</p>
-        </div>
-        <span className="badge badge-blue">DEMO</span>
+    <section aria-label="Market Simulator" className="card" style={{ padding: "20px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+        <h2 style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--t1)" }}>
+          Market Simulator
+        </h2>
+        <span className="tag tag-dim">Demo</span>
       </div>
 
-      {/* Scenario buttons */}
-      <div className="space-y-2 mb-4">
-        {EVENTS.map((ev) => {
+      {/* Scenario list */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "5px", marginBottom: "10px" }}>
+        {EVENTS.map(ev => {
           const isLoading = loading === ev.key;
           return (
             <button
               key={ev.key}
-              onClick={() => trigger(ev.key)}
+              onClick={() => fire(ev.key, `/api/simulate/${ev.key}`)}
               disabled={loading !== null}
-              className="w-full text-left rounded-xl px-4 py-3 transition-all duration-200 flex items-center justify-between"
+              aria-label={`Simulate ${ev.label}`}
               style={{
-                background: isLoading ? ev.bg : "var(--bg-raised)",
-                border: `1px solid ${isLoading ? ev.color : "var(--bg-border)"}`,
-                cursor: loading !== null ? "not-allowed" : "pointer",
-                opacity: loading !== null && !isLoading ? 0.5 : 1,
+                display: "flex", alignItems: "center", gap: "10px",
+                padding: "10px 12px", borderRadius: "7px", border: `1px solid ${isLoading ? ev.c + "44" : "var(--line)"}`,
+                background: isLoading ? `${ev.c}08` : "var(--raised)",
+                cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading && !isLoading ? 0.45 : 1,
+                transition: "background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease",
+                textAlign: "left", width: "100%",
               }}
             >
-              <div className="flex items-center gap-3">
-                <span className="text-xl">{ev.icon}</span>
-                <div>
-                  <div style={{ fontSize: "13px", fontWeight: 600, color: isLoading ? ev.color : "var(--text-primary)" }}>
-                    {ev.label}
-                  </div>
-                  <div className="mono text-[10px]" style={{ color: "var(--text-secondary)" }}>{ev.desc}</div>
-                </div>
+              {/* Dir indicator */}
+              <span style={{ fontFamily: "var(--mono)", fontSize: "16px", color: ev.c, width: "22px", textAlign: "center", flexShrink: 0, lineHeight: 1 }}
+                aria-hidden="true">
+                {ev.dir}
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontFamily: "var(--mono)", fontSize: "11px", fontWeight: 700, color: isLoading ? ev.c : "var(--t1)", marginBottom: "1px" }}>{ev.label}</p>
+                <p style={{ fontFamily: "var(--mono)", fontSize: "9px", color: "var(--t3)" }} className="truncate">{ev.desc}</p>
               </div>
-              {isLoading ? (
-                <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: ev.color }}>
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeDasharray="60" strokeDashoffset="20" />
-                </svg>
-              ) : (
-                <span className="mono text-xs" style={{ color: "var(--text-dim)" }}>
-                  {ev.expectedDir === "up" ? "↑ price" : "↓ price"}
-                </span>
-              )}
+              {isLoading && <Spinner />}
             </button>
           );
         })}
       </div>
 
-      {/* Organic trigger */}
+      {/* Divider */}
+      <hr className="hairline" style={{ margin: "10px 0" }} />
+
+      {/* Organic AI trigger */}
       <button
-        onClick={triggerOrganic}
+        onClick={() => fire("organic", "/api/trigger-update")}
         disabled={loading !== null}
-        className="w-full btn-secondary"
-        style={{ justifyContent: "center" }}
+        className="btn btn-ghost"
+        aria-label="Trigger organic AI market update"
+        style={{ width: "100%", height: "36px" }}
       >
-        {loading === "organic" ? (
-          <>
-            <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeDasharray="60" strokeDashoffset="20" />
-            </svg>
-            Analyzing...
-          </>
-        ) : (
-          <>🤖 Organic AI Update</>
-        )}
+        {loading === "organic" ? <><Spinner /> Analyzing…</> : "🤖 Organic AI Update"}
       </button>
 
-      {/* Result */}
-      {lastResult && (
-        <div className="mt-4 rounded-xl p-3" style={{ background: "var(--bg-void)", border: "1px solid var(--neon-green)33" }}>
-          <p className="mono text-[10px] uppercase tracking-wider mb-2" style={{ color: "var(--text-dim)" }}>Last Result</p>
-          <div className="flex items-center justify-between">
-            <span style={{ fontSize: "13px", color: "var(--text-primary)" }}>
-              Multiplier set to{" "}
-              <strong style={{ color: lastResult.multiplier > 1 ? "var(--neon-green)" : "var(--neon-red)" }}>
-                {lastResult.multiplier.toFixed(2)}×
-              </strong>
-            </span>
-            {lastResult.tx && (
-              <a
-                href={`https://explorer.solana.com/tx/${lastResult.tx}?cluster=devnet`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mono text-[10px]"
-                style={{ color: "var(--neon-green)" }}
-              >
+      {/* Last result */}
+      {last && (
+        <div style={{ marginTop: "10px", padding: "10px 12px", background: "var(--void)", border: "1px solid rgba(184,255,60,0.15)", borderRadius: "7px" }}>
+          <p className="label" style={{ marginBottom: "5px" }}>Result</p>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <p style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "var(--t1)" }}>
+              Multiplier → <span style={{ color: last.mul > 1 ? "var(--acid)" : "var(--red)", fontVariantNumeric: "tabular-nums" }}>{last.mul.toFixed(2)}×</span>
+            </p>
+            {last.tx && (
+              <a href={`https://explorer.solana.com/tx/${last.tx}?cluster=devnet`} target="_blank" rel="noopener noreferrer"
+                style={{ fontFamily: "var(--mono)", fontSize: "9px", color: "var(--acid)", letterSpacing: "0.08em" }}
+                aria-label="View result transaction on Solana Explorer">
                 TX ↗
               </a>
             )}
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }
