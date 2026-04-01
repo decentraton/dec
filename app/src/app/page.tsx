@@ -71,12 +71,12 @@ export default function Home() {
                 target={href.startsWith("http") ? "_blank" : "_self"}
                 rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
                 style={{
-                  fontFamily: "var(--mono)", fontSize: "10px", textTransform: "uppercase",
-                  letterSpacing: "0.1em", padding: "5px 12px", borderRadius: "5px",
+                  fontFamily: "var(--mono)", textTransform: "uppercase",
+                  letterSpacing: "0.08em", padding: "5px 12px", borderRadius: "5px",
                   color: label === "Dashboard" ? "var(--acid)" : "var(--t3)",
                   background: label === "Dashboard" ? "rgba(184,255,60,0.08)" : "transparent",
                   transition: "color 0.15s ease",
-                  textDecoration: "none",
+                  textDecoration: "none", fontSize: "12px",
                 }}>
                 {label}
               </a>
@@ -122,7 +122,7 @@ export default function Home() {
           </h1>
 
           <p style={{
-            fontFamily: "var(--mono)", fontSize: "13px",
+            fontFamily: "var(--mono)", fontSize: "14px",
             color: "var(--t2)", marginTop: "16px",
             maxWidth: "520px", lineHeight: "1.7",
           }}>

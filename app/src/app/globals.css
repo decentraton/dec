@@ -42,7 +42,7 @@ html {
   background: var(--void);
   color: var(--t1);
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: 15px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -87,8 +87,8 @@ body::before {
 /* ── Label / eyebrow text ──────────────────────────────── */
 .label {
   font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-size: 11px;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
   color: var(--t3);
   font-variant-numeric: tabular-nums;
@@ -97,7 +97,7 @@ body::before {
 /* ── Numeric display ───────────────────────────────────── */
 .num-xl {
   font-family: var(--mono);
-  font-size: 48px;
+  font-size: 52px;
   font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1;
@@ -105,13 +105,13 @@ body::before {
 }
 .num-lg {
   font-family: var(--mono);
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 700;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
 .num-md {
-  font-family: var(--mono); font-size: 18px; font-weight: 700;
+  font-family: var(--mono); font-size: 20px; font-weight: 700;
   letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
 }
 

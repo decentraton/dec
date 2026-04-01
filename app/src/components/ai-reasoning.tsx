@@ -53,7 +53,7 @@ export function AiReasoning({ analysis, loading }: { analysis: any; loading: boo
 
       {/* ── Top bar ── */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-        <h2 style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.04em", color: "var(--t1)", textTransform: "uppercase" }}>
+        <h2 style={{ fontFamily: "var(--sans)", fontSize: "14px", fontWeight: 700, letterSpacing: "0.04em", color: "var(--t1)", textTransform: "uppercase" }}>
           Oracle Status
         </h2>
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -62,7 +62,7 @@ export function AiReasoning({ analysis, loading }: { analysis: any; loading: boo
             role="status"
             aria-label={online ? "Oracle online" : "Oracle offline"}
           />
-          <span style={{ fontFamily: "var(--mono)", fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: online ? "var(--acid)" : "var(--red)" }}>
+          <span style={{ fontFamily: "var(--mono)", fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: online ? "var(--acid)" : "var(--red)" }}>
             {online ? "Gemini · Live" : "Offline"}
           </span>
         </div>
@@ -70,12 +70,12 @@ export function AiReasoning({ analysis, loading }: { analysis: any; loading: boo
 
       {/* ── Hero number ── */}
       <div style={{ textAlign: "center", padding: "22px 0 18px", borderRadius: "8px", background: "var(--void)", border: `1px solid ${mc}20`, marginBottom: "14px" }}>
-        <p className="label" style={{ marginBottom: "8px" }}>Current Multiplier</p>
+        <p className="label" style={{ marginBottom: "8px", fontSize: "11px" }}>Current Multiplier</p>
         <p className="num-xl" style={{ color: mc, letterSpacing: "-0.05em" }}>
-          {mul.toFixed(2)}<span style={{ fontSize: "22px", opacity: 0.5 }}>×</span>
+          {mul.toFixed(2)}<span style={{ fontSize: "24px", opacity: 0.5 }}>×</span>
         </p>
         {analysis?.confidence !== undefined && (
-          <p style={{ fontFamily: "var(--mono)", fontSize: "9px", color: "var(--t3)", marginTop: "8px" }}>
+          <p style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "var(--t3)", marginTop: "8px" }}>
             Confidence: {analysis.confidence}%
           </p>
         )}
@@ -90,8 +90,8 @@ export function AiReasoning({ analysis, loading }: { analysis: any; loading: boo
             { l: "IDL",     v: status.programLoaded ? "Loaded" : "Err" },
           ] as const).map(({ l, v }) => (
             <div key={l} style={{ background: "var(--raised)", border: "1px solid var(--line)", borderRadius: "6px", padding: "7px 10px", textAlign: "center" }}>
-              <p className="label" style={{ marginBottom: "3px" }}>{l}</p>
-              <p style={{ fontFamily: "var(--mono)", fontSize: "11px", fontWeight: 700, color: "var(--t1)", fontVariantNumeric: "tabular-nums" }}>{v}</p>
+              <p className="label" style={{ marginBottom: "3px", fontSize: "11px" }}>{l}</p>
+              <p style={{ fontFamily: "var(--mono)", fontSize: "13px", fontWeight: 700, color: "var(--t1)", fontVariantNumeric: "tabular-nums" }}>{v}</p>
             </div>
           ))}
         </div>
@@ -101,7 +101,7 @@ export function AiReasoning({ analysis, loading }: { analysis: any; loading: boo
       <div style={{ marginBottom: "12px" }}>
         <p className="label" style={{ marginBottom: "6px" }}>AI Reasoning</p>
         <div style={{ background: "var(--void)", border: "1px solid var(--line)", borderRadius: "6px", padding: "11px 13px", minHeight: "62px" }}>
-          <p style={{ fontFamily: "var(--mono)", fontSize: "11px", lineHeight: "1.7", color: "var(--t2)", wordBreak: "break-word" }}>
+          <p style={{ fontFamily: "var(--mono)", fontSize: "13px", lineHeight: "1.7", color: "var(--t2)", wordBreak: "break-word" }}>
             {loading
               ? <span style={{ color: "var(--t3)" }}>Analyzing…</span>
               : <Typer text={analysis?.reasoning ?? "Waiting for signal…"} />

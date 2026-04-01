@@ -31,10 +31,10 @@ export function KpiBar() {
         fetch(`${API_BASE}/api/current-analysis`).then(r => r.json()),
         fetch(`${API_BASE}/api/network-stats`).then(r => r.json()),
       ]);
-      const sol    = pr.status === "fulfilled" ? pr.value : {};
-      const st_    = st.status === "fulfilled" ? st.value : {};
-      const an_    = an.status === "fulfilled" ? an.value : {};
-      const nw_    = nw.status === "fulfilled" ? nw.value : {};
+      const sol = pr.status === "fulfilled" ? pr.value : {};
+      const st_ = st.status === "fulfilled" ? st.value : {};
+      const an_ = an.status === "fulfilled" ? an.value : {};
+      const nw_ = nw.status === "fulfilled" ? nw.value : {};
       const ms = st_.uptimeMs ?? 0;
       const h = Math.floor(ms / 3.6e6), m = Math.floor((ms % 3.6e6) / 6e4);
       setD({
@@ -52,48 +52,55 @@ export function KpiBar() {
   const mColor = d.mul > 1.05 ? "var(--acid)" : d.mul < 0.95 ? "var(--red)" : "var(--t2)";
   const cPos   = d.change >= 0;
 
+  const cardStyle = { padding: "18px 20px" };
+  const labelStyle = { fontFamily: "var(--mono)" as const, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase" as const, color: "var(--t3)", marginBottom: "10px", display: "block" as const };
+  const subStyle   = { fontFamily: "var(--mono)" as const, fontSize: "12px" };
+
   return (
-    <div role="region" aria-label="Key metrics" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "10px", marginBottom: "20px" }} className="r2">
+    <div role="region" aria-label="Key metrics"
+      style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "10px", marginBottom: "20px" }}
+      className="r2">
 
       {/* SOL/USD */}
-      <div className="card accent-bar" style={{ padding: "16px 18px" }}>
-        <p className="label" style={{ marginBottom: "10px" }}>SOL / USD</p>
-        <p className="num-lg" style={{ color: "var(--t1)", marginBottom: "6px" }}>
-          <span style={{ color: "var(--t3)", fontSize: "14px" }}>$</span>
+      <div className="card accent-bar" style={cardStyle}>
+        <span style={labelStyle}>SOL / USD</span>
+        <p className="num-lg" style={{ color: "var(--t1)", marginBottom: "7px" }}>
+          <span style={{ color: "var(--t3)", fontSize: "15px" }}>$</span>
           {d.sol > 0 ? <AnimNum to={d.sol} dec={2} /> : <span style={{ color: "var(--t3)" }}>—</span>}
         </p>
-        <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: cPos ? "var(--acid)" : "var(--red)" }}>
-          {cPos ? "▲" : "▼"} {Intl.NumberFormat("en", { maximumFractionDigits: 2 }).format(Math.abs(d.change))}% <span style={{ color: "var(--t3)" }}>24 h</span>
+        <p style={{ ...subStyle, color: cPos ? "var(--acid)" : "var(--red)" }}>
+          {cPos ? "▲" : "▼"} {Intl.NumberFormat("en", { maximumFractionDigits: 2 }).format(Math.abs(d.change))}%
+          <span style={{ color: "var(--t3)", marginLeft: "4px" }}>24h</span>
         </p>
       </div>
 
       {/* Multiplier */}
-      <div className="card" style={{ padding: "16px 18px", borderColor: `${mColor}30` }}>
-        <p className="label" style={{ marginBottom: "10px" }}>AI Multiplier</p>
-        <p className="num-lg" style={{ color: mColor, marginBottom: "6px" }}>
-          {d.mul > 0 ? <AnimNum to={d.mul} dec={2} /> : "1.00"}<span style={{ fontSize: "14px", opacity: 0.6 }}>×</span>
+      <div className="card" style={{ ...cardStyle, borderColor: `${mColor}30` }}>
+        <span style={labelStyle}>AI Multiplier</span>
+        <p className="num-lg" style={{ color: mColor, marginBottom: "7px" }}>
+          <AnimNum to={d.mul} dec={2} /><span style={{ fontSize: "15px", opacity: 0.5 }}>×</span>
         </p>
-        <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)" }}>
-          {d.mul > 1.05 ? "Demand ↑ — prices rising" : d.mul < 0.95 ? "Demand ↓ — prices falling" : "Stable market conditions"}
+        <p style={{ ...subStyle, color: "var(--t3)" }}>
+          {d.mul > 1.05 ? "Demand rising" : d.mul < 0.95 ? "Demand falling" : "Stable market"}
         </p>
       </div>
 
       {/* Updates */}
-      <div className="card" style={{ padding: "16px 18px" }}>
-        <p className="label" style={{ marginBottom: "10px" }}>Chain Updates</p>
-        <p className="num-lg" style={{ color: "var(--cyan)", marginBottom: "6px" }}>
+      <div className="card" style={cardStyle}>
+        <span style={labelStyle}>Chain Updates</span>
+        <p className="num-lg" style={{ color: "var(--cyan)", marginBottom: "7px" }}>
           <AnimNum to={d.updates} dec={0} />
         </p>
-        <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)" }}>Uptime: {d.uptime}</p>
+        <p style={{ ...subStyle, color: "var(--t3)" }}>Uptime: {d.uptime}</p>
       </div>
 
       {/* TPS */}
-      <div className="card" style={{ padding: "16px 18px" }}>
-        <p className="label" style={{ marginBottom: "10px" }}>Solana TPS</p>
-        <p className="num-lg" style={{ color: "var(--amber)", marginBottom: "6px" }}>
+      <div className="card" style={cardStyle}>
+        <span style={labelStyle}>Solana TPS</span>
+        <p className="num-lg" style={{ color: "var(--amber)", marginBottom: "7px" }}>
           {d.tps > 0 ? <AnimNum to={d.tps} dec={0} /> : <span style={{ color: "var(--t3)" }}>—</span>}
         </p>
-        <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)" }}>Devnet · Live</p>
+        <p style={{ ...subStyle, color: "var(--t3)" }}>Devnet · Live</p>
       </div>
     </div>
   );
