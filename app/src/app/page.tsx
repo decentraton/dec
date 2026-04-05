@@ -138,7 +138,7 @@ export default function Home() {
           {/* Info pills */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "24px" }}>
             {[
-              { l: "Program",  v: "36rS72…ULPj" },
+              { l: "Program",  v: "HCvBL7…BHSJ1" },
               { l: "Network",  v: "Solana Devnet" },
               { l: "AI Model", v: "Gemini 2.5 Flash Lite" },
               { l: "Interval", v: "Every 60 s" },

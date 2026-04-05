@@ -4,7 +4,7 @@
 
 AI-powered dynamic pricing oracle for DePIN GPU compute networks, built on Solana. The protocol autonomously adjusts price multipliers every 60 seconds based on real-time market signals using Google Gemini AI, recording every decision on-chain with SHA-256 proof.
 
-🔗 **Live Demo:** [http://localhost:3000](http://localhost:3000) | **Program:** [`36rS72…ULPj`](https://explorer.solana.com/address/36rS72Rgx7WesAjwv2cernhGDHBWXZuS3wpCTJVwULPj?cluster=devnet)
+🔗 **Live Demo:** [https://depin-pricing-app.onrender.com/](https://depin-pricing-app.onrender.com/) | **Program:** [`HCvBL7…BHSJ1`](https://explorer.solana.com/address/HCvBL7SYEyHX82gLENzoD2DUSogqqyEcX3og3upBHSJ1?cluster=devnet)
 
 ---
 

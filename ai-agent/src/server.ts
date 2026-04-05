@@ -49,6 +49,7 @@ let lastAnalysis: AnalysisEntry = {
 const analysisHistory: AnalysisEntry[] = [];
 const startTime = Date.now();
 let totalUpdates = 0;
+let isAutonomousEnabled = false; // Controlled by frontend toggle
 
 // ── GPU Providers catalog ──────────────────────────────────────────────
 const GPU_PROVIDERS = [
@@ -158,7 +159,22 @@ app.get("/api/status", (_req: Request, res: Response) => {
         totalUpdates,
         uptimeMs: Date.now() - startTime,
         programLoaded: program !== null,
+        isAutonomousEnabled,
     });
+});
+
+app.get("/api/settings", (_req: Request, res: Response) => {
+    res.json({ isAutonomousEnabled });
+});
+
+app.post("/api/settings/toggle", (req: Request, res: Response) => {
+    if (typeof req.body.enabled === "boolean") {
+        isAutonomousEnabled = req.body.enabled;
+    } else {
+        isAutonomousEnabled = !isAutonomousEnabled;
+    }
+    console.log(`[SETTINGS] Autonomous mode is now: ${isAutonomousEnabled ? "ON" : "OFF"}`);
+    res.json({ isAutonomousEnabled });
 });
 
 app.get("/api/current-analysis", (_req: Request, res: Response) => {
@@ -284,6 +300,12 @@ app.post("/api/trigger-update", async (req: Request, res: Response) => {
 
 // ── Autonomous Loop ────────────────────────────────────────────────────
 async function runAutonomousUpdate() {
+    if (!isAutonomousEnabled) {
+        console.log(`[AUTONOMOUS] ⏸  Paused (Organic AI Update is OFF).`);
+        setTimeout(runAutonomousUpdate, 15000); // Poll more frequently while paused to be responsive to toggle
+        return;
+    }
+
     console.log(`\n[AUTONOMOUS] ──── Triggering periodic update ────`);
     try {
         const signals = fetchMarketData();

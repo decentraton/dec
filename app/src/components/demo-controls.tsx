@@ -33,31 +33,40 @@ export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
     finally { setLoading(null); }
   };
 
-  // Auto organic update loop
+  // Fetch initial toggle state from backend
   useEffect(() => {
+    fetch(`${API_BASE}/api/settings`)
+      .then(r => r.json())
+      .then(d => setAutoOn(!!d.isAutonomousEnabled))
+      .catch(() => {});
+  }, []);
+
+  const handleToggle = async () => {
+    const nextState = !autoOn;
+    setAutoOn(nextState); // optimistic
+    try {
+      await fetch(`${API_BASE}/api/settings/toggle`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: nextState })
+      });
+    } catch {
+      setAutoOn(autoOn); // revert if fail
+    }
+  };
+
+  // Fake countdown purely for visual effect when ON
+  useEffect(() => {
+    let int: ReturnType<typeof setInterval>;
     if (autoOn) {
-      setCountdown(AUTO_INTERVAL_MS / 1000);
-      // Immediate first call
-      fire("organic", "/api/trigger-update");
-
-      timerRef.current = setInterval(() => {
-        setCountdown(AUTO_INTERVAL_MS / 1000);
-        fire("organic", "/api/trigger-update");
-      }, AUTO_INTERVAL_MS);
-
-      countRef.current = setInterval(() => {
-        setCountdown(c => (c <= 1 ? AUTO_INTERVAL_MS / 1000 : c - 1));
+      setCountdown(60);
+      int = setInterval(() => {
+        setCountdown(c => (c <= 1 ? 60 : c - 1));
       }, 1000);
     } else {
-      if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-      if (countRef.current) { clearInterval(countRef.current); countRef.current = null; }
-      setCountdown(AUTO_INTERVAL_MS / 1000);
+      setCountdown(60);
     }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (countRef.current) clearInterval(countRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => clearInterval(int);
   }, [autoOn]);
 
   const Spinner = () => (
@@ -138,7 +147,7 @@ export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
             role="switch"
             aria-checked={autoOn}
             aria-label={autoOn ? "Disable automatic AI updates" : "Enable automatic AI updates"}
-            onClick={() => setAutoOn(v => !v)}
+            onClick={handleToggle}
             style={{
               position: "relative",
               width: "48px", height: "26px", borderRadius: "13px",
@@ -172,10 +181,10 @@ export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
                 transition: "width 1s linear",
               }} />
             </div>
-            {loading === "organic" && (
+            {autoOn && countdown === 1 && (
               <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "8px" }}>
                 <Spinner />
-                <span style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "var(--acid)" }}>Querying Gemini AI…</span>
+                <span style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "var(--acid)" }}>Agent querying Gemini...</span>
               </div>
             )}
           </div>
