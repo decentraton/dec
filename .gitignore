@@ -15,6 +15,7 @@ test-ledger/
 .env.production.local
 **/.env
 **/.env.local
+.agent/
 
 # Solana Keypairs & sensitive JS/TS logic
 **/*-keypair.json
@@ -31,3 +32,5 @@ yarn-error.log*
 # OS files
 Thumbs.db
 desktop.ini
+gemini.md
+skills-lock.json

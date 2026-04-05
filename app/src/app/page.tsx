@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import { KpiBar }         from "../components/kpi-bar";
 import { GpuMarketplace } from "../components/gpu-marketplace";
@@ -45,7 +46,7 @@ export default function Home() {
         <div className="wrap" style={{ height: "58px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
 
           {/* Logo */}
-          <a href="/" aria-label="DePIN AI Oracle — home"
+          <Link href="/" aria-label="DePIN AI Oracle — home"
             style={{ display: "flex", alignItems: "center", gap: "11px", flexShrink: 0 }}>
             <svg aria-hidden="true" width="32" height="32" viewBox="0 0 32 32" fill="none">
               <rect width="32" height="32" rx="9" fill="var(--acid)" />
@@ -59,7 +60,7 @@ export default function Home() {
                 GPU Pricing Network
               </p>
             </div>
-          </a>
+          </Link>
 
           {/* Nav */}
           <nav aria-label="Primary navigation" style={{ display: "flex", gap: "2px", flex: 1, justifyContent: "center" }}>
