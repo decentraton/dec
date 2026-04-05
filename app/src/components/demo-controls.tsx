@@ -10,7 +10,7 @@ const EVENTS = [
   { key: "low_demand",   label: "Low Demand",       desc: "Market correction · compute −15%",    dir: "↓", c: "var(--cyan)"  },
 ] as const;
 
-const AUTO_INTERVAL_MS = 45_000; // 45s auto-update when toggled ON
+const AUTO_INTERVAL_MS = 60_000; // 60s auto-update when toggled ON (matches server)
 
 export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
   const [loading,   setLoading]   = useState<string | null>(null);
@@ -59,12 +59,12 @@ export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
   useEffect(() => {
     let int: ReturnType<typeof setInterval>;
     if (autoOn) {
-      setCountdown(60);
+      setCountdown(AUTO_INTERVAL_MS / 1000);
       int = setInterval(() => {
-        setCountdown(c => (c <= 1 ? 60 : c - 1));
+        setCountdown(c => (c <= 1 ? AUTO_INTERVAL_MS / 1000 : c - 1));
       }, 1000);
     } else {
-      setCountdown(60);
+      setCountdown(AUTO_INTERVAL_MS / 1000);
     }
     return () => clearInterval(int);
   }, [autoOn]);
@@ -138,7 +138,7 @@ export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
               🤖 Organic AI Update
             </p>
             <p style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "var(--t3)" }}>
-              {autoOn ? `Next update in ${countdown}s` : "Auto-update every 45 s"}
+              {autoOn ? `Next update in ${countdown}s` : "Auto-update every 60 s"}
             </p>
           </div>
 

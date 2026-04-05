@@ -130,7 +130,7 @@ export async function syncOnChainStats(program: any, oraclePubKey: PublicKey) {
         console.log("[SYNC] 🔄 Pulling on-chain state...");
         
         // 1. Get total transaction count for the program
-        const signatures = await program.provider.connection.getSignaturesForAddress(PROGRAM_ID, { limit: 100 });
+        const signatures = await program.provider.connection.getSignaturesForAddress(PROGRAM_ID, { limit: 1000 });
         const updateCount = signatures.filter((s: any) => !s.err).length;
 
         // 2. Fetch the current provider config and history
