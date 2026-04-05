@@ -11,7 +11,8 @@ import * as bs58 from "bs58";
 export const PROGRAM_ID = new PublicKey("HCvBL7SYEyHX82gLENzoD2DUSogqqyEcX3og3upBHSJ1");
 
 export function initSolanaClient(rpcUrl: string) {
-    const IDL_PATH = path.resolve(__dirname, "./idl.json");
+    // @ts-ignore - import.meta.dirname exists in Node 20.11+
+    const IDL_PATH = path.resolve(import.meta.dirname, "./idl.json");
     
     let oracleKeypair: Keypair;
     const envKey = process.env.ORACLE_PRIVATE_KEY?.trim();
