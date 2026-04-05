@@ -1,0 +1,37 @@
+services:
+  # 1. AI Pricing Oracle Agent (Backend)
+  - type: web
+    name: depin-pricing-agent
+    env: node
+    plan: free
+    region: frankfurt
+    rootDir: ai-agent
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false # User must provide in Render UI
+      - key: OPENAI_API_KEY
+        sync: false # User must provide in Render UI
+      - key: ORACLE_PRIVATE_KEY
+        sync: false # User must provide in Render UI
+      - key: HELIUS_RPC_URL
+        sync: false # User must provide in Render UI
+      - key: PORT
+        value: 3001
+
+  # 2. Next.js Frontend (App)
+  - type: web
+    name: depin-pricing-app
+    env: node
+    plan: free
+    region: frankfurt
+    rootDir: app
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          name: depin-pricing-agent
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
