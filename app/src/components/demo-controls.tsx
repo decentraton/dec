@@ -10,22 +10,31 @@ const EVENTS = [
   { key: "low_demand",   label: "Low Demand",       desc: "Market correction · compute −15%",    dir: "↓", c: "var(--cyan)"  },
 ] as const;
 
-const INSTANT_PRESETS = [
-  { key: "price_spike", label: "2.8×", desc: "Spike",  mul: 2.8, c: "#ff4444" },
-  { key: "price_up",    label: "1.5×", desc: "+50%",   mul: 1.5, c: "var(--acid)" },
-  { key: "price_reset", label: "1.0×", desc: "Reset",  mul: 1.0, c: "var(--t3)" },
-  { key: "price_down",  label: "0.7×", desc: "−30%",   mul: 0.7, c: "var(--cyan)" },
-  { key: "price_crash", label: "0.4×", desc: "Crash",  mul: 0.4, c: "#7b61ff" },
+// ── Price-level quick-set (5 buttons in a row) ─────────────────────────────
+const PRICE_PRESETS = [
+  { key: "price_crash", label: "0.4×", c: "#7b61ff", bg: "#7b61ff22" },
+  { key: "price_down",  label: "0.7×", c: "#22d3ee", bg: "#22d3ee22" },
+  { key: "price_reset", label: "1.0×", c: "#888",    bg: "#88888822" },
+  { key: "price_up",    label: "1.5×", c: "#b8ff3c", bg: "#b8ff3c22" },
+  { key: "price_spike", label: "2.8×", c: "#ff4444", bg: "#ff444422" },
 ] as const;
 
-const DEMO_SCENARIOS = [
-  { key: "gpu_surge",      label: "GPU Surge",       mul: 2.2,  dir: "↑", c: "#ff4444",     desc: "H100 supply crunch · 2.2×"    },
-  { key: "network_peak",   label: "Network Peak",    mul: 1.8,  dir: "↑", c: "var(--acid)", desc: "Solana congestion · 1.8×"     },
-  { key: "depin_adoption", label: "DePIN Adoption",  mul: 1.6,  dir: "↑", c: "#00c896",     desc: "Infrastructure demand · 1.6×" },
-  { key: "recovery",       label: "Recovery",        mul: 1.15, dir: "↗", c: "var(--cyan)", desc: "Post-correction settle · 1.15×"},
-  { key: "bear_market",    label: "Bear Market",     mul: 0.55, dir: "↓", c: "#7b61ff",     desc: "Sustained downturn · 0.55×"   },
-  { key: "flash_crash",    label: "Flash Crash",     mul: 0.3,  dir: "↓", c: "#ff4444",     desc: "Liquidity exit · 0.3×"        },
-  { key: "compute_famine", label: "Compute Famine",  mul: 3.0,  dir: "⚡", c: "#ff6b00",    desc: "Critical shortage · 3.0× max" },
+// ── Market scenarios (6 = 3 × 2 grid, balanced) ────────────────────────────
+const SCENARIOS = [
+  { key: "gpu_surge",      label: "GPU Surge",      mul: "2.2×", dir: "↑", c: "#ff4444", bg: "#ff444418" },
+  { key: "network_peak",   label: "Network Peak",   mul: "1.8×", dir: "↑", c: "#b8ff3c", bg: "#b8ff3c18" },
+  { key: "depin_adoption", label: "DePIN Adoption", mul: "1.6×", dir: "↑", c: "#00c896", bg: "#00c89618" },
+  { key: "recovery",       label: "Recovery",       mul: "1.15×",dir: "↗", c: "#22d3ee", bg: "#22d3ee18" },
+  { key: "bear_market",    label: "Bear Market",    mul: "0.55×",dir: "↓", c: "#7b61ff", bg: "#7b61ff18" },
+  { key: "flash_crash",    label: "Flash Crash",    mul: "0.3×", dir: "↓", c: "#ff4444", bg: "#ff444418" },
+] as const;
+
+// ── GPU models (4 cards = 2 × 2 grid) ──────────────────────────────────────
+const GPU_MODELS = [
+  { key: "gpu_h100",    label: "H100 SXM5", vram: "80 GB", mul: "2.5×", tier: "HPC",       c: "#ff4444", bg: "#ff444418" },
+  { key: "gpu_a100",    label: "A100",      vram: "80 GB", mul: "1.9×", tier: "Training",  c: "#b8ff3c", bg: "#b8ff3c18" },
+  { key: "gpu_l40s",    label: "L40S",      vram: "48 GB", mul: "1.4×", tier: "Inference", c: "#00c896", bg: "#00c89618" },
+  { key: "gpu_rtx4090", label: "RTX 4090",  vram: "24 GB", mul: "1.0×", tier: "Prosumer",  c: "#22d3ee", bg: "#22d3ee18" },
 ] as const;
 
 const AUTO_INTERVAL_MS = 60_000; // 60s — must match server autonomous loop interval
@@ -40,18 +49,14 @@ export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
 
   const fire = async (key: string, url: string) => {
     setLoading(key); setLast(null);
-    console.log("[v0] fire() called:", key, `${API_BASE}${url}`);
     try {
       const r = await fetch(`${API_BASE}${url}`, { method: "POST" });
       const d = await r.json();
-      console.log("[v0] fire() response:", r.status, d);
       if (r.ok && d.multiplier !== undefined) {
         setLast({ event: key, mul: d.multiplier, tx: d.txSignature });
         onUpdate();
       }
-    } catch (err) {
-      console.log("[v0] fire() error:", err);
-    }
+    } catch {}
     finally { setLoading(null); }
   };
 
@@ -110,85 +115,109 @@ export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
         <span className="tag tag-dim" style={{ fontSize: "10px" }}>Demo</span>
       </div>
 
-      {/* ── Instant Price Override ── */}
-      <div style={{ marginBottom: "12px" }}>
-        <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
-          Instant Override · No AI
-        </p>
-        <div style={{ display: "flex", gap: "6px" }}>
-          {INSTANT_PRESETS.map(p => {
-            const isLoading = loading === `instant_${p.key}`;
-            return (
-              <button
-                key={p.key}
-                onClick={() => fire(`instant_${p.key}`, `/api/simulate-instant/${p.key}`)}
-                disabled={loading !== null}
-                aria-label={`Set price to ${p.label}`}
-                style={{
-                  flex: 1,
-                  display: "flex", flexDirection: "column", alignItems: "center",
-                  padding: "9px 4px",
-                  borderRadius: "8px",
-                  border: `1px solid ${isLoading ? p.c + "88" : "var(--line)"}`,
-                  background: isLoading ? `${p.c}18` : "var(--raised)",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  opacity: loading && !isLoading ? 0.4 : 1,
-                  transition: "background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease",
-                }}>
-                <span style={{ fontFamily: "var(--mono)", fontSize: "13px", fontWeight: 800, color: isLoading ? p.c : "var(--t1)", lineHeight: 1.2 }}>{p.label}</span>
-                <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: p.c, marginTop: "3px" }}>{p.desc}</span>
-              </button>
-            );
-          })}
-        </div>
+      {/* ── 1. Price Level ── */}
+      <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
+        Price Override · Instant
+      </p>
+      <div style={{ display: "flex", gap: "5px", marginBottom: "12px" }}>
+        {PRICE_PRESETS.map(p => {
+          const isLoading = loading === `instant_${p.key}`;
+          return (
+            <button
+              key={p.key}
+              onClick={() => fire(`instant_${p.key}`, `/api/simulate-instant/${p.key}`)}
+              disabled={loading !== null}
+              aria-label={`Set price multiplier to ${p.label}`}
+              style={{
+                flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
+                padding: "8px 2px", borderRadius: "8px",
+                border: `1px solid ${isLoading ? p.c : "var(--line)"}`,
+                background: isLoading ? p.bg : "var(--raised)",
+                cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading && !isLoading ? 0.35 : 1,
+                transition: "all 0.15s ease",
+              }}>
+              <span style={{ fontFamily: "var(--mono)", fontSize: "12px", fontWeight: 800, color: isLoading ? p.c : "var(--t1)", lineHeight: 1.3 }}>{p.label}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Divider */}
-      <hr className="hairline" style={{ margin: "10px 0 12px" }} />
-
-      {/* ── Demo Scenarios (no AI) ── */}
+      {/* ── 2. Market Scenarios ── */}
+      <hr className="hairline" style={{ margin: "0 0 12px" }} />
       <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
-        Demo Scenarios · No AI
+        Market Scenarios · No AI
       </p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "12px" }}>
-        {DEMO_SCENARIOS.map(sc => {
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "5px", marginBottom: "12px" }}>
+        {SCENARIOS.map(sc => {
           const isLoading = loading === `instant_${sc.key}`;
           return (
             <button
               key={sc.key}
               onClick={() => fire(`instant_${sc.key}`, `/api/simulate-instant/${sc.key}`)}
               disabled={loading !== null}
-              aria-label={`Demo scenario: ${sc.label}`}
+              aria-label={`Simulate ${sc.label}`}
               style={{
                 display: "flex", flexDirection: "column", alignItems: "flex-start",
-                padding: "10px 12px",
-                borderRadius: "8px",
-                border: `1px solid ${isLoading ? sc.c + "88" : "var(--line)"}`,
-                background: isLoading ? `${sc.c}18` : "var(--raised)",
+                padding: "9px 10px", borderRadius: "8px",
+                border: `1px solid ${isLoading ? sc.c : "var(--line)"}`,
+                background: isLoading ? sc.bg : "var(--raised)",
                 cursor: loading ? "not-allowed" : "pointer",
-                opacity: loading && !isLoading ? 0.4 : 1,
-                transition: "background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease",
-                textAlign: "left", width: "100%",
+                opacity: loading && !isLoading ? 0.35 : 1,
+                transition: "all 0.15s ease", textAlign: "left", width: "100%",
               }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                <span style={{ fontFamily: "var(--mono)", fontSize: "14px", color: sc.c, lineHeight: 1, flexShrink: 0 }}>{sc.dir}</span>
-                <span style={{ fontFamily: "var(--mono)", fontSize: "12px", fontWeight: 700, color: isLoading ? sc.c : "var(--t1)", lineHeight: 1.2 }}>
-                  {sc.label}
-                </span>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "3px" }}>
+                <span style={{ fontSize: "11px", color: sc.c, lineHeight: 1 }}>{sc.dir}</span>
                 {isLoading && <Spinner />}
               </div>
-              <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)", lineHeight: 1.4 }}>{sc.desc}</span>
+              <span style={{ fontFamily: "var(--mono)", fontSize: "11px", fontWeight: 700, color: isLoading ? sc.c : "var(--t1)", lineHeight: 1.2, marginBottom: "2px" }}>{sc.label}</span>
+              <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: sc.c }}>{sc.mul}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Divider */}
-      <hr className="hairline" style={{ margin: "10px 0 12px" }} />
-
-      {/* Scenario buttons (AI) */}
+      {/* ── 3. GPU Model ── */}
+      <hr className="hairline" style={{ margin: "0 0 12px" }} />
       <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
-        AI Scenarios · Gemini Analysis
+        GPU Model · Select
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5px", marginBottom: "12px" }}>
+        {GPU_MODELS.map(gpu => {
+          const isLoading = loading === `instant_${gpu.key}`;
+          return (
+            <button
+              key={gpu.key}
+              onClick={() => fire(`instant_${gpu.key}`, `/api/simulate-instant/${gpu.key}`)}
+              disabled={loading !== null}
+              aria-label={`Select GPU: ${gpu.label}`}
+              style={{
+                display: "flex", flexDirection: "column", alignItems: "flex-start",
+                padding: "10px 12px", borderRadius: "8px",
+                border: `1px solid ${isLoading ? gpu.c : "var(--line)"}`,
+                background: isLoading ? gpu.bg : "var(--raised)",
+                cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading && !isLoading ? 0.35 : 1,
+                transition: "all 0.15s ease", textAlign: "left", width: "100%",
+              }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", marginBottom: "4px" }}>
+                <span style={{ fontFamily: "var(--mono)", fontSize: "12px", fontWeight: 700, color: isLoading ? gpu.c : "var(--t1)" }}>{gpu.label}</span>
+                {isLoading ? <Spinner /> : <span style={{ fontFamily: "var(--mono)", fontSize: "11px", color: gpu.c, fontWeight: 700 }}>{gpu.mul}</span>}
+              </div>
+              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)" }}>{gpu.vram}</span>
+                <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--line-hi)" }}>·</span>
+                <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: gpu.c }}>{gpu.tier}</span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── 4. AI Scenarios ── */}
+      <hr className="hairline" style={{ margin: "0 0 12px" }} />
+      <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
+        AI Scenarios · Gemini
       </p>
       {/* Scenario buttons */}
       <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "12px" }}>

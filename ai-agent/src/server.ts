@@ -301,20 +301,25 @@ app.post("/api/simulate/:event", async (req: Request, res: Response) => {
 
 /** Instant price override — no AI call, for live demos */
 const INSTANT_PRESETS: Record<string, { multiplier: number; label: string; reasoning: string }> = {
-    // ── Multiplier sliders ──────────────────────────────────────────
-    price_spike:      { multiplier: 2.8, label: "Price Spike",       reasoning: "Manual demo override: extreme demand spike — GPU price surged to 2.8×." },
-    price_up:         { multiplier: 1.5, label: "Price +50%",         reasoning: "Manual demo override: demand increased — GPU price set to 1.5×." },
-    price_reset:      { multiplier: 1.0, label: "Price Reset",        reasoning: "Manual demo override: market neutral — GPU price reset to 1.0×." },
-    price_down:       { multiplier: 0.7, label: "Price −30%",         reasoning: "Manual demo override: oversupply signal — GPU price dropped to 0.7×." },
-    price_crash:      { multiplier: 0.4, label: "Price Crash",        reasoning: "Manual demo override: demand collapse — GPU price crashed to 0.4×." },
-    // ── Named demo scenarios (no AI) ────────────────────────────────
-    gpu_surge:        { multiplier: 2.2, label: "GPU Surge",          reasoning: "Demo scenario: sudden H100 supply constraint pushes GPU compute prices to 2.2× baseline." },
-    network_peak:     { multiplier: 1.8, label: "Network Peak",       reasoning: "Demo scenario: Solana network congestion during high-volume period — oracle prices up 1.8×." },
-    flash_crash:      { multiplier: 0.3, label: "Flash Crash",        reasoning: "Demo scenario: flash sell-off triggered by liquidity withdrawal — prices collapsed to 0.3×." },
-    recovery:         { multiplier: 1.15, label: "Recovery",          reasoning: "Demo scenario: market recovery after correction — prices stabilizing at 1.15×." },
-    depin_adoption:   { multiplier: 1.6,  label: "DePIN Adoption",    reasoning: "Demo scenario: surge in decentralized physical infrastructure demand — prices climb to 1.6×." },
-    compute_famine:   { multiplier: 3.0,  label: "Compute Famine",    reasoning: "Demo scenario: critical shortage of available GPU nodes — prices reach maximum 3.0× ceiling." },
-    bear_market:      { multiplier: 0.55, label: "Bear Market",       reasoning: "Demo scenario: sustained crypto bear market reduces GPU rental demand to 0.55×." },
+    // ── Price level overrides ──────────────────────────────────────
+    price_spike:      { multiplier: 2.8,  label: "Price Spike",      reasoning: "Manual demo: extreme demand spike — GPU compute price surged to 2.8×." },
+    price_up:         { multiplier: 1.5,  label: "Price +50%",       reasoning: "Manual demo: demand increased — GPU compute price set to 1.5×." },
+    price_reset:      { multiplier: 1.0,  label: "Price Reset",      reasoning: "Manual demo: market neutral — GPU compute price reset to 1.0× baseline." },
+    price_down:       { multiplier: 0.7,  label: "Price −30%",       reasoning: "Manual demo: oversupply signal — GPU compute price dropped to 0.7×." },
+    price_crash:      { multiplier: 0.4,  label: "Price Crash",      reasoning: "Manual demo: demand collapse — GPU compute price crashed to 0.4×." },
+    // ── Market scenarios ──────────────────────────────────────────
+    gpu_surge:        { multiplier: 2.2,  label: "GPU Surge",        reasoning: "Demo: sudden H100 supply constraint pushes GPU compute prices to 2.2× baseline." },
+    network_peak:     { multiplier: 1.8,  label: "Network Peak",     reasoning: "Demo: Solana network congestion during high-volume period — oracle prices up 1.8×." },
+    depin_adoption:   { multiplier: 1.6,  label: "DePIN Adoption",   reasoning: "Demo: surge in decentralized physical infrastructure demand — prices climb to 1.6×." },
+    recovery:         { multiplier: 1.15, label: "Recovery",         reasoning: "Demo: market recovery after correction — prices stabilizing at 1.15×." },
+    bear_market:      { multiplier: 0.55, label: "Bear Market",      reasoning: "Demo: sustained crypto bear market reduces GPU rental demand to 0.55×." },
+    flash_crash:      { multiplier: 0.3,  label: "Flash Crash",      reasoning: "Demo: flash sell-off triggered by liquidity withdrawal — prices collapsed to 0.3×." },
+    compute_famine:   { multiplier: 3.0,  label: "Compute Famine",   reasoning: "Demo: critical shortage of available GPU nodes — prices reach maximum 3.0× ceiling." },
+    // ── GPU model scenarios ────────────────────────────────────────
+    gpu_h100:         { multiplier: 2.5,  label: "H100 SXM5",        reasoning: "Demo: NVIDIA H100 SXM5 80GB selected — premium HPC tier, demand at 2.5× vs baseline A10G." },
+    gpu_a100:         { multiplier: 1.9,  label: "A100 80GB",        reasoning: "Demo: NVIDIA A100 80GB PCIe selected — high-throughput training tier, pricing at 1.9×." },
+    gpu_l40s:         { multiplier: 1.4,  label: "L40S 48GB",        reasoning: "Demo: NVIDIA L40S 48GB selected — inference-optimized tier, pricing at 1.4×." },
+    gpu_rtx4090:      { multiplier: 1.0,  label: "RTX 4090",         reasoning: "Demo: NVIDIA RTX 4090 24GB selected — prosumer tier, baseline pricing at 1.0×." },
 };
 
 app.post("/api/simulate-instant/:preset", (req: Request, res: Response) => {
@@ -374,7 +379,7 @@ app.post("/api/trigger-update", async (req: Request, res: Response) => {
     }
 });
 
-// ── Autonomous Loop ────────────────────────────────────────────────────
+// ── Autonomous Loop ──────────────────────��─────────────────────────────
 async function runAutonomousUpdate() {
     if (!isAutonomousEnabled) {
         console.log(`[AUTONOMOUS] ⏸  Paused (Organic AI Update is OFF).`);
