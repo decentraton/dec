@@ -7,7 +7,8 @@ import { KpiBar }         from "../components/kpi-bar";
 import { GpuMarketplace } from "../components/gpu-marketplace";
 import { AiReasoning }    from "../components/ai-reasoning";
 import { PriceChart }     from "../components/price-chart";
-import { DemoControls }   from "../components/demo-controls";
+import { DemoControls }     from "../components/demo-controls";
+import { EconomicImpact }  from "../components/economic-impact";
 
 const WalletBtn = dynamic(
   async () => (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
@@ -157,6 +158,9 @@ export default function Home() {
 
         {/* KPIs */}
         <KpiBar />
+
+        {/* Economic Impact */}
+        <EconomicImpact history={history} />
 
         {/* 2-COLUMN GRID */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 356px", gap: "16px", alignItems: "start" }}>
