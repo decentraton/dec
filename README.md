@@ -9,10 +9,11 @@ AI-powered dynamic pricing oracle for DePIN GPU compute networks, built on Solan
 ## 🚀 Key Features
 
 - **Autonomous AI Oracle** — Gemini AI sets GPU prices every 60 s. No human interaction required.
-- **Multi-Model Fallback Chain** — `gemini-2.5-flash` → `gemini-2.5-flash-lite` → `gemini-2.0-flash` → `gpt-4o-mini`. Always resilient.
+- **Multi-Model Fallback Chain** — `gemini-2.5-flash-lite` → `gpt-4o-mini` → Market-aware baseline. Optimized for speed and cost.
 - **On-Chain Proof** — Every AI decision is SHA-256 hashed and stored in `PriceHistory` PDA on Solana Devnet.
 - **Real-Time Dashboard** — Premium Next.js UI with live charts, KPI metrics, and GPU marketplace.
-- **Wallet Rentals** — Phantom/Solflare wallet integration for actual GPU rental transactions on Devnet.
+- **Success Notifications** — Interactive UI alerts with direct Solana Explorer links after every rental.
+- **Organic Update Sync** — Frontend toggle directly controls the backend AI loop to save API quotas.
 - **Market Simulator** — Trigger GPU shortage, bull run, or low demand scenarios to see AI react in real time.
 
 ---
@@ -119,11 +120,7 @@ npm run dev    # Next.js on http://localhost:3000
 The analyzer (`ai-agent/src/analyzer.ts`) implements a **4-level fallback chain**:
 
 ```
-gemini-2.5-flash (v1beta)
-    ↓ on error
 gemini-2.5-flash-lite (v1beta)
-    ↓ on error
-gemini-2.0-flash (v1)
     ↓ on error
 gpt-4o-mini (OpenAI)
     ↓ on error
@@ -265,7 +262,8 @@ The dashboard uses the **"Devtools Luxe"** design language:
 - [x] Premium dashboard (Geist font, KPI bar, dual-axis chart)
 - [x] GPU Marketplace with Phantom/Solflare wallet rentals
 - [x] Market Simulator (GPU shortage / bull run / low demand)
-- [x] Auto-update toggle with countdown (45 s loop)
+- [x] Auto-update toggle synchronized with Backend loop
+- [x] Success Notifications with Solana Explorer links
 - [ ] Mainnet Beta deployment
 - [ ] Permissionless provider registration
 - [ ] Historical GPU utilization analytics
