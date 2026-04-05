@@ -1,22 +1,15 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import OpenAI from "openai";
 import { fetchSolPrice } from "./utils/market.js";
+// Dynamic reading of env keys
 
-const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
-
-// Per-model API version (gemini-2.5-* only available in v1beta)
+// Per-model API version
 const MODEL_ENDPOINTS: Record<string, string> = {
-  "gemini-2.5-flash":       "https://generativelanguage.googleapis.com/v1beta",
   "gemini-2.5-flash-lite":  "https://generativelanguage.googleapis.com/v1beta",
-  "gemini-2.0-flash":       "https://generativelanguage.googleapis.com/v1",
-  "gemini-2.0-flash-lite":  "https://generativelanguage.googleapis.com/v1",
 };
 
 const GEMINI_MODELS = [
-  "gemini-2.5-flash",
   "gemini-2.5-flash-lite",
-  "gemini-2.0-flash",
-  "gemini-2.0-flash-lite",
 ];
 
 /** Strip markdown fences and code blocks, return parsed JSON */
@@ -44,13 +37,15 @@ function normMul(v: number): number {
 /** Call Gemini REST API directly (bypasses SDK's v1beta default) */
 async function callGeminiRest(modelName: string, prompt: string): Promise<{ multiplier: number; reasoning: string }> {
   const base = MODEL_ENDPOINTS[modelName] || "https://generativelanguage.googleapis.com/v1";
-  const url  = `${base}/models/${modelName}:generateContent?key=${GEMINI_KEY}`;
+  const currentKey = process.env.GEMINI_API_KEY || "";
+  const url  = `${base}/models/${modelName}:generateContent?key=${currentKey}`;
   const body = {
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: {
       temperature: 0.3,
-      maxOutputTokens: 512,   // increased to avoid truncation
+      maxOutputTokens: 1024,
       candidateCount: 1,
+      responseMimeType: "application/json",
     },
   };
 
@@ -58,7 +53,7 @@ async function callGeminiRest(modelName: string, prompt: string): Promise<{ mult
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(15_000),
+    signal: AbortSignal.timeout(60_000), // Increased from 15s to 60s
   });
 
   if (!resp.ok) {
@@ -70,7 +65,18 @@ async function callGeminiRest(modelName: string, prompt: string): Promise<{ mult
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
   if (!text) throw new Error("Empty response");
 
-  const parsed = extractJson(text);
+  let parsed;
+  try {
+    parsed = extractJson(text);
+  } catch (err) {
+    // Attempt naive repair for unterminated strings
+    try {
+      parsed = extractJson(text + '"}');
+    } catch (e2) {
+      throw new Error("Unterminated string or invalid JSON returned by AI");
+    }
+  }
+
   if (typeof parsed.multiplier !== "number") throw new Error("No multiplier in response");
   return { multiplier: normMul(parsed.multiplier), reasoning: String(parsed.reasoning || "") };
 }
@@ -111,7 +117,7 @@ Respond ONLY with raw JSON, no markdown:
   }
 
   // ── Try OpenAI fallback ─────────────────────────────────────
-  if (GEMINI_KEY.length < 5 || true) { // also try if all Gemini fail
+  if ((process.env.GEMINI_API_KEY || "").length < 5 || true) { // also try if all Gemini fail
     try {
       console.log("[AI] Trying gpt-4o-mini…");
       const resp = await openai.chat.completions.create({

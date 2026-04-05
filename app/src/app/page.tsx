@@ -65,7 +65,7 @@ export default function Home() {
           <nav aria-label="Primary navigation" style={{ display: "flex", gap: "2px", flex: 1, justifyContent: "center" }}>
             {([
               ["Dashboard",  "#"],
-              ["Explorer",   `https://explorer.solana.com/address/36rS72Rgx7WesAjwv2cernhGDHBWXZuS3wpCTJVwULPj?cluster=devnet`],
+              ["Explorer",   `https://explorer.solana.com/address/HCvBL7SYEyHX82gLENzoD2DUSogqqyEcX3og3upBHSJ1?cluster=devnet`],
               ["GitHub",     "https://github.com/decentraton/dec"],
             ] as const).map(([label, href]) => (
               <a key={label} href={href}
@@ -139,7 +139,7 @@ export default function Home() {
             {[
               { l: "Program",  v: "36rS72…ULPj" },
               { l: "Network",  v: "Solana Devnet" },
-              { l: "AI Model", v: "Gemini 1.5 Flash" },
+              { l: "AI Model", v: "Gemini 2.5 Flash Lite" },
               { l: "Interval", v: "Every 60 s" },
             ].map(({ l, v }) => (
               <div key={l} style={{
@@ -177,9 +177,8 @@ export default function Home() {
 
             {/* On-chain info */}
             <div className="card r4" style={{ padding: "16px 18px" }}>
-              <p className="lbl" style={{ marginBottom: "12px" }}>On-Chain Info</p>
               {[
-                { l: "Program ID", v: "36rS72…ULPj", href: "https://explorer.solana.com/address/36rS72Rgx7WesAjwv2cernhGDHBWXZuS3wpCTJVwULPj?cluster=devnet" },
+                { l: "Program ID", v: "HCvBL7…BHSJ1", href: "https://explorer.solana.com/address/HCvBL7SYEyHX82gLENzoD2DUSogqqyEcX3og3upBHSJ1?cluster=devnet" },
                 { l: "Cluster",    v: "Devnet",        href: null },
                 { l: "Framework",  v: "Anchor 0.30.1", href: null },
                 { l: "Rust",       v: "1.75.0",        href: null },
@@ -215,7 +214,7 @@ export default function Home() {
           </div>
           <div style={{ display: "flex", gap: "20px" }}>
             {[
-              { l: "Explorer", href: "https://explorer.solana.com/address/36rS72Rgx7WesAjwv2cernhGDHBWXZuS3wpCTJVwULPj?cluster=devnet" },
+              { l: "Explorer", href: "https://explorer.solana.com/address/HCvBL7SYEyHX82gLENzoD2DUSogqqyEcX3og3upBHSJ1?cluster=devnet" },
               { l: "GitHub",   href: "https://github.com/decentraton/dec" },
             ].map(({ l, href }) => (
               <a key={l} href={href} target="_blank" rel="noopener noreferrer"

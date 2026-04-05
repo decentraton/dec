@@ -12,10 +12,10 @@ import * as os from "os";
 import dotenv from "dotenv";
 
 // Load .env from project root or ai-agent root
-dotenv.config({ path: path.resolve(process.cwd(), "../../.env") });
+dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
-const PROGRAM_ID = new PublicKey("36rS72Rgx7WesAjwv2cernhGDHBWXZuS3wpCTJVwULPj");
+const PROGRAM_ID = new PublicKey("HCvBL7SYEyHX82gLENzoD2DUSogqqyEcX3og3upBHSJ1");
 const RPC_URL = process.env.HELIUS_RPC_URL || "https://api.devnet.solana.com";
 const IDL_PATH = path.resolve(process.cwd(), "../target/idl/depin_pricing.json");
 const WALLET_PATH = path.join(os.homedir(), ".config/solana/id.json");

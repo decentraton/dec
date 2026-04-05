@@ -7,7 +7,7 @@ pub mod state;
 use instructions::*;
 use state::*;
 
-declare_id!("36rS72Rgx7WesAjwv2cernhGDHBWXZuS3wpCTJVwULPj");
+declare_id!("HCvBL7SYEyHX82gLENzoD2DUSogqqyEcX3og3upBHSJ1");
 
 #[program]
 pub mod depin_pricing {

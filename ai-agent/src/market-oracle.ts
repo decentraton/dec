@@ -21,25 +21,51 @@ let _cachedSolPrice: SolPriceData | null = null;
 let _cacheTs = 0;
 const CACHE_TTL = 30_000; // 30s
 
+let useCoinGecko = true;
+
 export async function fetchSolPrice(): Promise<SolPriceData> {
     const now = Date.now();
     if (_cachedSolPrice && now - _cacheTs < CACHE_TTL) {
         return _cachedSolPrice;
     }
 
+    // Toggle oracle source each time
+    useCoinGecko = !useCoinGecko;
+
     try {
-        const res = await fetch(
-            "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true&include_last_updated_at=true",
-            { signal: AbortSignal.timeout(5000) }
-        );
-        if (!res.ok) throw new Error(`CoinGecko HTTP ${res.status}`);
-        const json = await res.json();
-        const data = json.solana as SolPriceData;
-        _cachedSolPrice = data;
-        _cacheTs = now;
-        return data;
+        if (useCoinGecko) {
+            console.log("[ORACLE] Fetching from CoinGecko...");
+            const res = await fetch(
+                "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true&include_last_updated_at=true",
+                { signal: AbortSignal.timeout(10000) }
+            );
+            if (!res.ok) throw new Error(`CoinGecko HTTP ${res.status}`);
+            const json = await res.json();
+            const data = json.solana as SolPriceData;
+
+            _cachedSolPrice = data;
+            _cacheTs = now;
+            return data;
+        } else {
+            console.log("[ORACLE] Fetching from Binance...");
+            const res = await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=SOLUSDT", { signal: AbortSignal.timeout(10000) });
+            if (!res.ok) throw new Error(`Binance HTTP ${res.status}`);
+            const json = await res.json();
+            const price = parseFloat(json.lastPrice);
+            const data: SolPriceData = {
+                usd: price,
+                usd_24h_change: parseFloat(json.priceChangePercent),
+                usd_24h_vol: parseFloat(json.volume) * price,
+                usd_market_cap: 68_000_000_000, 
+                last_updated_at: Math.floor(now / 1000),
+            };
+
+            _cachedSolPrice = data;
+            _cacheTs = now;
+            return data;
+        }
     } catch (err: any) {
-        console.warn("[ORACLE] CoinGecko failed, returning mock:", err.message);
+        console.warn(`[ORACLE] API failed (${useCoinGecko ? "CoinGecko" : "Binance"}), returning mock:`, err.message);
         // Fallback: return last known or a stable mock
         if (_cachedSolPrice) return _cachedSolPrice;
         return {

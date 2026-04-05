@@ -11,7 +11,7 @@ import { DEMO_EVENTS, fetchMarketData } from "./mock-data.js";
 import { fetchSolPrice, fetchNetworkStats, enrichWithMarketData } from "./market-oracle.js";
 
 // ── .env ───────────────────────────────────────────────────────────────
-dotenv.config({ path: path.resolve(process.cwd(), "../../.env") });
+dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 const app = express();
