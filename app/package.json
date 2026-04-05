@@ -26,7 +26,6 @@
     "openai": "^6.33.0",
     "react": "^19.2.4",
     "react-dom": "19.1.0",
-    "fastestsmallesttextencoderdecoder": "^1.0.22",
     "recharts": "^2.15.0"
   },
   "devDependencies": {
@@ -43,8 +42,5 @@
   "overrides": {
     "plain-crypto-js": "npm:crypto-js@4.2.0"
   },
-  "resolutions": {
-    "@solana/wallet-adapter-react/@solana-mobile/wallet-adapter-mobile": "2.2.6",
-    "fastestsmallesttextencoderdecoder": "1.0.22"
-  }
+  "resolutions": {}
 }
