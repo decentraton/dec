@@ -6,7 +6,7 @@ use crate::errors::PricingError;
 pub struct WithdrawEarnings<'info> {
     #[account(
         mut,
-        seeds = [b"provider", owner.key().as_ref()],
+        seeds = [b"provider_v1", owner.key().as_ref()],
         bump
     )]
     pub provider_config: Account<'info, ProviderConfig>,

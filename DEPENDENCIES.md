@@ -24,16 +24,26 @@ Located in `/app`
 
 ## 🦀 Smart Contract (Rust)
 Located in `/programs/depin_pricing`
-- **Rust Version**: `1.75.0` (Strict requirement)
-- **Anchor Framework**: `0.31.0` (Contract side) / `0.30.1` (Client side)
+- **Rust Version**: `1.75.0` (Strict requirement for SBF)
+- **Anchor Framework**: `0.30.1` (Unified Client/Contract)
 - **Edition**: `2021`
+- **Borsh**: `1.5.1` (Pinned for Rust 1.75 compatibility)
+
+### 🗡️ Iron Lock (Local Patches in `/deps`)
+These libraries are manually patched to bypass the `edition 2024` build crisis:
+- **`blake3`**: `1.5.5` (Last Rust 2021 stable)
+- **`block-buffer`**: `0.10.4`
+- **`subtle`**: `2.5.0`
+- **`digest`**: `0.10.7`
+- **`constant_time_eq`**: `0.3.0`
+- **`cpufeatures`**: `0.2.9`
+- **`crypto-common`**: `0.1.6`
+- **`cmov`**: `0.5.1`
 
 ### 🔧 Critical Rust Pins (Cargo.lock)
-These versions are locked to ensure build stability with Anchor:
-- **`proc-macro2`**: `1.0.106`
+- **`proc-macro2`**: `1.0.106` (with `span-locations` feature)
 - **`syn`**: `2.0.117`
 - **`getrandom`**: `0.2.17`
-- **`rand`**: `0.8.5`
 
 ## 🔧 Infrastructure & Tooling
 - **RPC Provider**: Helius (Solana Devnet)

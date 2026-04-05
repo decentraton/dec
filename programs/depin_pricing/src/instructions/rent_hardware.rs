@@ -7,7 +7,7 @@ use crate::errors::PricingError;
 pub struct RentHardware<'info> {
     #[account(
         mut,
-        seeds = [b"provider", provider_config.owner.key().as_ref()],
+        seeds = [b"provider_v1", provider_config.owner.key().as_ref()],
         bump
     )]
     pub provider_config: Account<'info, ProviderConfig>,

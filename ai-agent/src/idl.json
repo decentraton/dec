@@ -327,12 +327,20 @@
           "name": "oracle",
           "writable": true,
           "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
         {
           "name": "new_multiplier",
           "type": "u16"
+        },
+        {
+          "name": "confidence",
+          "type": "u8"
         },
         {
           "name": "reasoning_hash",
@@ -720,6 +728,14 @@
             "type": "u16"
           },
           {
+            "name": "index",
+            "type": "u16"
+          },
+          {
+            "name": "confidence",
+            "type": "u8"
+          },
+          {
             "name": "timestamp",
             "type": "i64"
           },
@@ -760,6 +776,15 @@
           {
             "name": "current_index",
             "type": "u8"
+          },
+          {
+            "name": "_reserved",
+            "type": {
+              "array": [
+                "u8",
+                128
+              ]
+            }
           }
         ]
       }
@@ -788,6 +813,15 @@
           {
             "name": "update_cooldown",
             "type": "i64"
+          },
+          {
+            "name": "_reserved",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
           }
         ]
       }

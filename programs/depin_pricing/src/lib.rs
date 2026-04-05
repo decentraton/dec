@@ -40,9 +40,17 @@ pub mod depin_pricing {
     pub fn update_multiplier(
         ctx: Context<UpdateMultiplier>,
         new_multiplier: u16,
+        confidence: u8,
         reasoning_hash: [u8; 32],
     ) -> Result<()> {
-        instructions::update_multiplier(ctx, new_multiplier, reasoning_hash)
+        instructions::update_multiplier(ctx, new_multiplier, confidence, reasoning_hash)
+    }
+
+    pub fn dispute_multiplier(
+        ctx: Context<DisputeMultiplier>,
+        entry_idx: u8,
+    ) -> Result<()> {
+        instructions::dispute_multiplier(ctx, entry_idx)
     }
 
     pub fn rent_hardware(

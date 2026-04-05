@@ -7,7 +7,7 @@ pub struct InitializeProtocol<'info> {
         init,
         payer = admin,
         space = ProtocolConfig::LEN,
-        seeds = [b"protocol_config"],
+        seeds = [b"protocol_cfg_v1"],
         bump
     )]
     pub protocol_config: Account<'info, ProtocolConfig>,

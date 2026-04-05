@@ -79,28 +79,28 @@ export async function updateOnChain(program: any, oracleKeypair: Keypair, multip
     const reasoningHash = Array.from(crypto.createHash("sha256").update(reasoning).digest());
     
     const [protocolConfigPda] = PublicKey.findProgramAddressSync(
-      [Buffer.from("protocol_config")],
+      [Buffer.from("protocol_cfg_v1")],
       PROGRAM_ID
     );
     const [providerConfigPda] = PublicKey.findProgramAddressSync(
-      [Buffer.from("provider"), oracleKeypair.publicKey.toBuffer()],
+      [Buffer.from("provider_v1"), oracleKeypair.publicKey.toBuffer()],
       PROGRAM_ID
     );
     const [priceHistoryPda] = PublicKey.findProgramAddressSync(
-      [Buffer.from("price_history"), oracleKeypair.publicKey.toBuffer()],
+      [Buffer.from("history_v1"), oracleKeypair.publicKey.toBuffer()],
       PROGRAM_ID
     );
 
     try {
         const tx = await program.methods
-            .updateMultiplier(multiplier, reasoningHash)
+            .updateMultiplier(multiplier, 50, reasoningHash)
             .accounts({
                 providerConfig: providerConfigPda,
                 priceHistory: priceHistoryPda,
                 protocolConfig: protocolConfigPda,
                 oracle: oracleKeypair.publicKey,
+                systemProgram: anchor.web3.SystemProgram.programId,
             })
-            // .signers([oracleKeypair]) is handled by provider Wallet
             .rpc();
 
         console.log(`[TX] ✅ https://explorer.solana.com/tx/${tx}?cluster=devnet`);
@@ -108,5 +108,51 @@ export async function updateOnChain(program: any, oracleKeypair: Keypair, multip
     } catch(err: any) {
         console.error("[TX] ❌ Failed: ", err.message?.slice(0, 300));
         return null;
+    }
+}
+
+export async function syncOnChainStats(program: any, oraclePubKey: PublicKey) {
+    if (!program) return { totalUpdates: 0, history: [], multiplier: 1.0 };
+
+    const [protocolConfigPda] = PublicKey.findProgramAddressSync([Buffer.from("protocol_cfg_v1")], PROGRAM_ID);
+    const [providerConfigPda] = PublicKey.findProgramAddressSync([Buffer.from("provider_v1"), oraclePubKey.toBuffer()], PROGRAM_ID);
+    const [priceHistoryPda] = PublicKey.findProgramAddressSync([Buffer.from("history_v1"), oraclePubKey.toBuffer()], PROGRAM_ID);
+
+    try {
+        console.log("[SYNC] 🔄 Pulling on-chain state...");
+        
+        // 1. Get total transaction count for the program
+        const signatures = await program.provider.connection.getSignaturesForAddress(PROGRAM_ID, { limit: 100 });
+        const updateCount = signatures.filter((s: any) => !s.err).length;
+
+        // 2. Fetch the current provider config and history
+        const [providerAcc, historyAcc] = await Promise.all([
+            program.account.providerConfig.fetch(providerConfigPda),
+            program.account.priceHistory.fetch(priceHistoryPda)
+        ]);
+
+        // 3. Map circular buffer to chronological order
+        const rawEntries = historyAcc.entries as any[];
+        const sortedHistory = rawEntries
+            .filter(e => e.timestamp.toNumber() > 0)
+            .sort((a, b) => a.timestamp.toNumber() - b.timestamp.toNumber());
+
+        console.log(`[SYNC] ✅ Found ${updateCount} updates on-chain. Multiplier: ${providerAcc.currentMultiplier / 100}x`);
+
+        return {
+            totalUpdates: updateCount,
+            multiplier: providerAcc.currentMultiplier / 100,
+            history: sortedHistory.map(e => ({
+                multiplier: e.multiplier / 100,
+                reasoning: "On-chain history entry",
+                reasoningHash: Buffer.from(e.reasoningHash).toString("hex"),
+                timestamp: e.timestamp.toNumber() * 1000,
+                txSignature: "RESTORED",
+                confidence: e.confidence || 75
+            }))
+        };
+    } catch (err: any) {
+        console.warn("[SYNC] ⚠️  Skipping on-chain sync (accounts might not be initialized):", err.message);
+        return { totalUpdates: 0, history: [], multiplier: 1.0 };
     }
 }

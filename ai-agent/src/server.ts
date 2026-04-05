@@ -5,7 +5,7 @@ import * as path from "path";
 import * as crypto from "crypto";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import OpenAI from "openai";
-import { initSolanaClient, updateOnChain, PROGRAM_ID } from "./solana-client.js";
+import { initSolanaClient, updateOnChain, PROGRAM_ID, syncOnChainStats } from "./solana-client.js";
 import { analyzeWithAI } from "./analyzer.js";
 import { DEMO_EVENTS, fetchMarketData } from "./mock-data.js";
 import { fetchSolPrice, fetchNetworkStats, enrichWithMarketData } from "./market-oracle.js";
@@ -343,8 +343,26 @@ async function runAutonomousUpdate() {
 }
 
 // ── Boot ───────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`\n🤖 DePIN Oracle API running on http://localhost:${PORT}`);
+    
+    // ── Sync with on-chain state ───────────────────────────────────────
+    const onChainStats = await syncOnChainStats(program, oracleKeypair.publicKey);
+    totalUpdates = onChainStats.totalUpdates;
+    if (onChainStats.history.length > 0) {
+        onChainStats.history.forEach(e => analysisHistory.push(e as any));
+        const last = onChainStats.history[onChainStats.history.length - 1];
+        lastAnalysis = {
+            multiplier: last.multiplier,
+            reasoning: last.reasoning,
+            reasoningHash: last.reasoningHash,
+            timestamp: last.timestamp,
+            txSignature: "ON-CHAIN",
+            solPrice: 0, // Will be updated by first cycle
+            confidence: last.confidence || 75
+        };
+    }
+
     console.log(`   Wallet:  ${oracleKeypair.publicKey.toBase58()}`);
     console.log(`   Program: ${PROGRAM_ID.toBase58()}`);
     console.log(`   RPC:     ${RPC_URL}`);

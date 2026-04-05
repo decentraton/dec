@@ -1,0 +1,152 @@
+[
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775402248860,
+    "txSignature": "7TSynyQ3hb9FDqkSRXnRnBE15CMXjsoiNnEUxySp62t6Y1C9jmaNDiBRJ4C4stzNnKEq4JBACSsa8fPHPr86aJw",
+    "event": "autonomous",
+    "solPrice": 79.26
+  },
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775402313511,
+    "txSignature": "5RSym1Fa6kaNcYVzTP38RVpU3NYccRxAwuaCKp9wxzLBUfuGWByG6YpVRGtLX3sEnVA6mCzZdGJ61f1yMnhsWxLU",
+    "event": "autonomous",
+    "solPrice": 79.15
+  },
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775402420246,
+    "txSignature": "62avFWtzDHdBVuHktWqfhnYHHDDXHY91GbLHTsh8kyTyUb6BHeDhzMfLmfDtjTFcDATBvfqtHjoALamXv7USXYxT",
+    "event": "autonomous",
+    "solPrice": 79.19
+  },
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775402485541,
+    "txSignature": "3CYoedFkzNwjCTzbogxBiiB523m9EkAuVSm6qdGu3oAcunCx2hx8j6h9MmVeyjKevH3qnix3EM9JojfGTcMfJygA",
+    "event": "autonomous",
+    "solPrice": 79.3
+  },
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775402568941,
+    "txSignature": "3gVEYrNuaHoP7CXxK25WKMMYh6ZcEebT8GJY4G7dfZze9HqRvC7GwKJ7Q3iXL2u1A37JaAYmuVdXJpzSfAMHTH9k",
+    "event": "autonomous",
+    "solPrice": 79.22
+  },
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775402634493,
+    "txSignature": "21emnooPAy31UeF2auugKYt2DaLTUqKg2gZibwGhNUsiMKEd9QvGdfG5S58oQuT53QsQMZ5dRLsbJr1ecKHpHiXE",
+    "event": "autonomous",
+    "solPrice": 79.2
+  },
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775402699651,
+    "txSignature": "3dRQGYsKVbpiYJgonj6PEmXeUbi1WcvtHK4L4H7xwNADD4fPuktqbdPEGLRAx1Wj2crF9rU3mfeDe1RMjkKv8HBP",
+    "event": "autonomous",
+    "solPrice": 79.22
+  },
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775402765471,
+    "txSignature": "2RRtAKcd8c1TQPqNntEbqzSsKKAj8UiuXkz5xaqrYVaskn8BNhCdaicbncqZYgpM7wpbYrPJuiqDytF4DdgqfKrG",
+    "event": "autonomous",
+    "solPrice": 79.51
+  },
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775402830447,
+    "txSignature": "4hUCJgBTDXimf1eWGS6ivtahU7mRNXKTZfANXiBM86L8bMEaA5DmaWAugtWFcVG39uewX4Z759Ugsc2U3ECtLDmT",
+    "event": "autonomous",
+    "solPrice": 79.21
+  },
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775402895848,
+    "txSignature": "3wSWBqCLV5j5xsZ3hkWfvPENMGrJDQDwCv8quDQFh6wkiizZUeBEwtzd3mJywUeFxG6iyNiEXvV3fYSB6VMmYYEf",
+    "event": "autonomous",
+    "solPrice": 80.03
+  },
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775402960449,
+    "txSignature": "3ecuHF4fU2i2w38csMZdR4ynJRWeGzKxi1dgRgcr96MMEh8BvCNHqXhsT7EfJUfgoq4jf4BfJEzxK4nc9WKZXsSY",
+    "event": "autonomous",
+    "solPrice": 79.46
+  },
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775403571434,
+    "txSignature": "5PjLPYGxNBXQwKMd9JVPwhMeMLkMtbDRhfQZg2AgdzHjWXdSYyEVVykfffMn9sPDs4aF4bBrHKJ2ydaMSBuweSHx",
+    "event": "autonomous",
+    "solPrice": 79.85
+  },
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775403636636,
+    "txSignature": "4sT8LPG3iY4QpgM9e6EcR9hijRk2u48TjBtjwBwznf5UL1paK8rAXi5UEvEMSPPpypeCHNv4ReX3BhBEiXq7Fd2f",
+    "event": "autonomous",
+    "solPrice": 79.86
+  },
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775403701832,
+    "txSignature": "5XgqJwTBfw21Gj6yu383TFMwk9w1Mzqtr2SMT4Sjs765KU2pXDGnskgEHCazNuMwKLK4EpMeoyLsqhNKwjdmiiEg",
+    "event": "autonomous",
+    "solPrice": 79.79
+  },
+  {
+    "multiplier": 1,
+    "reasoning": "Market-aware fallback (AI unavailable)",
+    "reasoningHash": "2b764fe7cef13e48886f065ede2354642f5e8ea2e9ef62e26473e6ef8a405966",
+    "confidence": 50,
+    "timestamp": 1775403766704,
+    "txSignature": "4fJQidCJ9rbQCEU5rojPUQs4QKKxzAAa7sFiA6REJaPJLiiJkFyZwm6eLWLnrpwdE7UrWPktLKCmybehVqZjNn8t",
+    "event": "autonomous",
+    "solPrice": 79.83
+  }
+]

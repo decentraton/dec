@@ -16,4 +16,10 @@ pub enum PricingError {
     InsufficientFunds,
     #[msg("Unauthorized admin attempted to update protocol.")]
     UnauthorizedAdmin,
+    #[msg("Unauthorized provider attempted to perform this action.")]
+    UnauthorizedProvider,
+    #[msg("Dispute denied for high-confidence AI pricing updates.")]
+    HighConfidenceDisputeDenied,
+    #[msg("The provided entry index is invalid.")]
+    InvalidIndex,
 }

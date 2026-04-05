@@ -4,6 +4,18 @@ members = [
 ]
 resolver = "2"
 
+[patch.crates-io]
+# ULTIMATE LOCKDOWN: Use officially downloaded source tarballs with fake versions 
+# to satisfy requirements while keeping edition 2021 compatibility across the entire stack.
+block-buffer = { path = "deps/block-buffer-0.12.0" }
+constant_time_eq = { path = "deps/constant_time_eq-0.4.2" }
+cpufeatures = { path = "deps/cpufeatures-0.3.0" }
+crypto-common = { path = "deps/crypto-common-0.2.1" }
+cmov = { path = "deps/cmov-0.5.3" }
+subtle = { path = "deps/subtle-2.6.1" }
+digest = { path = "deps/digest-0.11.2" }
+blake3 = { path = "deps/blake3-1.8.4" }
+
 [profile.release]
 overflow-checks = true
 lto = "fat"

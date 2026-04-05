@@ -7,7 +7,7 @@ pub struct InitializeProvider<'info> {
         init,
         payer = owner,
         space = ProviderConfig::LEN,
-        seeds = [b"provider", owner.key().as_ref()],
+        seeds = [b"provider_v1", owner.key().as_ref()],
         bump
     )]
     pub provider_config: Account<'info, ProviderConfig>,
@@ -16,7 +16,7 @@ pub struct InitializeProvider<'info> {
         init,
         payer = owner,
         space = PriceHistory::LEN,
-        seeds = [b"price_history", owner.key().as_ref()],
+        seeds = [b"history_v1", owner.key().as_ref()],
         bump
     )]
     pub price_history: Account<'info, PriceHistory>,
