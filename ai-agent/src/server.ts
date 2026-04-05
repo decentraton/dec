@@ -299,6 +299,50 @@ app.post("/api/simulate/:event", async (req: Request, res: Response) => {
     }
 });
 
+/** Instant price override — no AI call, for live demos */
+const INSTANT_PRESETS: Record<string, { multiplier: number; label: string; reasoning: string }> = {
+    // ── Multiplier sliders ──────────────────────────────────────────
+    price_spike:      { multiplier: 2.8, label: "Price Spike",       reasoning: "Manual demo override: extreme demand spike — GPU price surged to 2.8×." },
+    price_up:         { multiplier: 1.5, label: "Price +50%",         reasoning: "Manual demo override: demand increased — GPU price set to 1.5×." },
+    price_reset:      { multiplier: 1.0, label: "Price Reset",        reasoning: "Manual demo override: market neutral — GPU price reset to 1.0×." },
+    price_down:       { multiplier: 0.7, label: "Price −30%",         reasoning: "Manual demo override: oversupply signal — GPU price dropped to 0.7×." },
+    price_crash:      { multiplier: 0.4, label: "Price Crash",        reasoning: "Manual demo override: demand collapse — GPU price crashed to 0.4×." },
+    // ── Named demo scenarios (no AI) ────────────────────────────────
+    gpu_surge:        { multiplier: 2.2, label: "GPU Surge",          reasoning: "Demo scenario: sudden H100 supply constraint pushes GPU compute prices to 2.2× baseline." },
+    network_peak:     { multiplier: 1.8, label: "Network Peak",       reasoning: "Demo scenario: Solana network congestion during high-volume period — oracle prices up 1.8×." },
+    flash_crash:      { multiplier: 0.3, label: "Flash Crash",        reasoning: "Demo scenario: flash sell-off triggered by liquidity withdrawal — prices collapsed to 0.3×." },
+    recovery:         { multiplier: 1.15, label: "Recovery",          reasoning: "Demo scenario: market recovery after correction — prices stabilizing at 1.15×." },
+    depin_adoption:   { multiplier: 1.6,  label: "DePIN Adoption",    reasoning: "Demo scenario: surge in decentralized physical infrastructure demand — prices climb to 1.6×." },
+    compute_famine:   { multiplier: 3.0,  label: "Compute Famine",    reasoning: "Demo scenario: critical shortage of available GPU nodes — prices reach maximum 3.0× ceiling." },
+    bear_market:      { multiplier: 0.55, label: "Bear Market",       reasoning: "Demo scenario: sustained crypto bear market reduces GPU rental demand to 0.55×." },
+};
+
+app.post("/api/simulate-instant/:preset", (req: Request, res: Response) => {
+    const key = req.params.preset;
+    const preset = INSTANT_PRESETS[key];
+    if (!preset) {
+        return res.status(404).json({ error: `Unknown preset "${key}". Available: ${Object.keys(INSTANT_PRESETS).join(", ")}` });
+    }
+
+    console.log(`\n[ INSTANT ] ──── ${key.toUpperCase()} → ${preset.multiplier}× (no AI, no chain) ────`);
+
+    const rHash = hashReasoning(preset.reasoning);
+    const entry: AnalysisEntry = {
+        multiplier: preset.multiplier,
+        reasoning: preset.reasoning,
+        reasoningHash: rHash,
+        timestamp: Date.now(),
+        txSignature: null, // no chain write — instant response for demos
+        event: `instant_${key}`,
+        confidence: 100,
+    };
+    lastAnalysis = entry;
+    pushHistory(entry);
+    totalUpdates++;
+
+    res.json({ success: true, ...entry });
+});
+
 /** Trigger an organic AI update */
 app.post("/api/trigger-update", async (req: Request, res: Response) => {
     try {
