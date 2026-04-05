@@ -14,7 +14,8 @@ const TIER: Record<string, { c: string; l: string }> = {
 };
 const FLAG: Record<string, string> = {
   "us-east-1": "🇺🇸", "us-west-2": "🇺🇸",
-  "eu-central-1": "🇩🇪", "ap-southeast-1": "🇸🇬",
+  "eu-central-1": "🇩🇪", "eu-west-1": "🇳🇱",
+  "ap-southeast-1": "🇸🇬", "ap-northeast-1": "🇯🇵",
 };
 
 interface Prov {
@@ -35,11 +36,18 @@ export function GpuMarketplace() {
   const [lastRent,  setLastRent]  = useState<{ name: string; sig: string } | null>(null);
 
   const GPU_FILTER_OPTIONS = [
-    { key: "all",    label: "All GPUs" },
-    { key: "H100",   label: "H100" },
-    { key: "A100",   label: "A100" },
-    { key: "L40S",   label: "L40S" },
-    { key: "4090",   label: "RTX 4090" },
+    { key: "all",   label: "All GPUs" },
+    { key: "H200",  label: "H200" },
+    { key: "H100",  label: "H100" },
+    { key: "A100",  label: "A100" },
+    { key: "L40S",  label: "L40S" },
+    { key: "A6000", label: "A6000" },
+    { key: "A10G",  label: "A10G" },
+    { key: "A30",   label: "A30" },
+    { key: "L4",    label: "L4" },
+    { key: "4090",  label: "RTX 4090" },
+    { key: "4080",  label: "RTX 4080" },
+    { key: "3090",  label: "RTX 3090" },
   ] as const;
   const { publicKey, sendTransaction, connected } = useWallet();
   const { connection } = useConnection();
