@@ -18,6 +18,16 @@ const INSTANT_PRESETS = [
   { key: "price_crash", label: "0.4×", desc: "Crash",  mul: 0.4, c: "#7b61ff" },
 ] as const;
 
+const DEMO_SCENARIOS = [
+  { key: "gpu_surge",      label: "GPU Surge",       mul: 2.2,  dir: "↑", c: "#ff4444",     desc: "H100 supply crunch · 2.2×"    },
+  { key: "network_peak",   label: "Network Peak",    mul: 1.8,  dir: "↑", c: "var(--acid)", desc: "Solana congestion · 1.8×"     },
+  { key: "depin_adoption", label: "DePIN Adoption",  mul: 1.6,  dir: "↑", c: "#00c896",     desc: "Infrastructure demand · 1.6×" },
+  { key: "recovery",       label: "Recovery",        mul: 1.15, dir: "↗", c: "var(--cyan)", desc: "Post-correction settle · 1.15×"},
+  { key: "bear_market",    label: "Bear Market",     mul: 0.55, dir: "↓", c: "#7b61ff",     desc: "Sustained downturn · 0.55×"   },
+  { key: "flash_crash",    label: "Flash Crash",     mul: 0.3,  dir: "↓", c: "#ff4444",     desc: "Liquidity exit · 0.3×"        },
+  { key: "compute_famine", label: "Compute Famine",  mul: 3.0,  dir: "⚡", c: "#ff6b00",    desc: "Critical shortage · 3.0× max" },
+] as const;
+
 const AUTO_INTERVAL_MS = 60_000; // 60s — must match server autonomous loop interval
 
 export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
@@ -127,6 +137,46 @@ export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
             );
           })}
         </div>
+      </div>
+
+      {/* Divider */}
+      <hr className="hairline" style={{ margin: "10px 0 12px" }} />
+
+      {/* ── Demo Scenarios (no AI) ── */}
+      <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
+        Demo Scenarios · No AI
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "12px" }}>
+        {DEMO_SCENARIOS.map(sc => {
+          const isLoading = loading === `instant_${sc.key}`;
+          return (
+            <button
+              key={sc.key}
+              onClick={() => fire(`instant_${sc.key}`, `/api/simulate-instant/${sc.key}`)}
+              disabled={loading !== null}
+              aria-label={`Demo scenario: ${sc.label}`}
+              style={{
+                display: "flex", flexDirection: "column", alignItems: "flex-start",
+                padding: "10px 12px",
+                borderRadius: "8px",
+                border: `1px solid ${isLoading ? sc.c + "88" : "var(--line)"}`,
+                background: isLoading ? `${sc.c}18` : "var(--raised)",
+                cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading && !isLoading ? 0.4 : 1,
+                transition: "background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease",
+                textAlign: "left", width: "100%",
+              }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+                <span style={{ fontFamily: "var(--mono)", fontSize: "14px", color: sc.c, lineHeight: 1, flexShrink: 0 }}>{sc.dir}</span>
+                <span style={{ fontFamily: "var(--mono)", fontSize: "12px", fontWeight: 700, color: isLoading ? sc.c : "var(--t1)", lineHeight: 1.2 }}>
+                  {sc.label}
+                </span>
+                {isLoading && <Spinner />}
+              </div>
+              <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)", lineHeight: 1.4 }}>{sc.desc}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Divider */}
