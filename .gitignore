@@ -16,6 +16,7 @@ test-ledger/
 **/.env
 **/.env.local
 .agent/
+.agents/
 
 # Solana Keypairs & sensitive JS/TS logic
 **/*-keypair.json

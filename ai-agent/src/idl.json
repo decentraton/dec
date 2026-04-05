@@ -1,0 +1,836 @@
+{
+  "address": "HCvBL7SYEyHX82gLENzoD2DUSogqqyEcX3og3upBHSJ1",
+  "metadata": {
+    "name": "depin_pricing",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "initialize_protocol",
+      "discriminator": [
+        188,
+        233,
+        252,
+        106,
+        134,
+        146,
+        202,
+        91
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  116,
+                  111,
+                  99,
+                  111,
+                  108,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "oracle",
+          "type": "pubkey"
+        },
+        {
+          "name": "min_multiplier",
+          "type": "u16"
+        },
+        {
+          "name": "max_multiplier",
+          "type": "u16"
+        },
+        {
+          "name": "update_cooldown",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "initialize_provider",
+      "discriminator": [
+        181,
+        103,
+        225,
+        14,
+        214,
+        210,
+        161,
+        238
+      ],
+      "accounts": [
+        {
+          "name": "provider_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  118,
+                  105,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "price_history",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  105,
+                  99,
+                  101,
+                  95,
+                  104,
+                  105,
+                  115,
+                  116,
+                  111,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "gpu_type",
+          "type": {
+            "defined": {
+              "name": "GpuType"
+            }
+          }
+        },
+        {
+          "name": "base_price",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "rent_hardware",
+      "discriminator": [
+        125,
+        25,
+        103,
+        184,
+        205,
+        18,
+        49,
+        32
+      ],
+      "accounts": [
+        {
+          "name": "provider_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  118,
+                  105,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "provider_config.owner",
+                "account": "ProviderConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "renter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "duration_hours",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "update_multiplier",
+      "discriminator": [
+        46,
+        178,
+        53,
+        101,
+        34,
+        163,
+        246,
+        173
+      ],
+      "accounts": [
+        {
+          "name": "provider_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  118,
+                  105,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "provider_config.owner",
+                "account": "ProviderConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "price_history",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  105,
+                  99,
+                  101,
+                  95,
+                  104,
+                  105,
+                  115,
+                  116,
+                  111,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "provider_config.owner",
+                "account": "ProviderConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "protocol_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  116,
+                  111,
+                  99,
+                  111,
+                  108,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "oracle",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "new_multiplier",
+          "type": "u16"
+        },
+        {
+          "name": "reasoning_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "update_oracle",
+      "discriminator": [
+        112,
+        41,
+        209,
+        18,
+        248,
+        226,
+        252,
+        188
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  116,
+                  111,
+                  99,
+                  111,
+                  108,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "new_oracle",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "withdraw_earnings",
+      "discriminator": [
+        6,
+        132,
+        233,
+        254,
+        241,
+        87,
+        247,
+        185
+      ],
+      "accounts": [
+        {
+          "name": "provider_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  118,
+                  105,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "PriceHistory",
+      "discriminator": [
+        38,
+        241,
+        40,
+        19,
+        42,
+        228,
+        93,
+        152
+      ]
+    },
+    {
+      "name": "ProtocolConfig",
+      "discriminator": [
+        207,
+        91,
+        250,
+        28,
+        152,
+        179,
+        215,
+        209
+      ]
+    },
+    {
+      "name": "ProviderConfig",
+      "discriminator": [
+        4,
+        245,
+        250,
+        76,
+        109,
+        58,
+        29,
+        205
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "EarningsWithdrawn",
+      "discriminator": [
+        2,
+        155,
+        160,
+        28,
+        85,
+        112,
+        127,
+        79
+      ]
+    },
+    {
+      "name": "HardwareRented",
+      "discriminator": [
+        108,
+        3,
+        14,
+        148,
+        217,
+        98,
+        229,
+        98
+      ]
+    },
+    {
+      "name": "MultiplierUpdated",
+      "discriminator": [
+        97,
+        156,
+        95,
+        2,
+        94,
+        11,
+        231,
+        105
+      ]
+    },
+    {
+      "name": "OracleUpdated",
+      "discriminator": [
+        138,
+        9,
+        51,
+        219,
+        228,
+        198,
+        11,
+        147
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "UnauthorizedOracle",
+      "msg": "Unauthorized oracle attempted to update prices."
+    },
+    {
+      "code": 6001,
+      "name": "PriceOutOfBounds",
+      "msg": "The price multiplier provided is out of the allowed bounds."
+    },
+    {
+      "code": 6002,
+      "name": "CooldownNotElapsed",
+      "msg": "The update cooldown has not elapsed yet."
+    },
+    {
+      "code": 6003,
+      "name": "ProviderInactive",
+      "msg": "Hardware provider is inactive."
+    },
+    {
+      "code": 6004,
+      "name": "MathOverflow",
+      "msg": "Math calculation overflowed."
+    },
+    {
+      "code": 6005,
+      "name": "InsufficientFunds",
+      "msg": "Insufficient funds in the escrow PDA."
+    },
+    {
+      "code": 6006,
+      "name": "UnauthorizedAdmin",
+      "msg": "Unauthorized admin attempted to update protocol."
+    }
+  ],
+  "types": [
+    {
+      "name": "EarningsWithdrawn",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "provider",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GpuType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "A100"
+          },
+          {
+            "name": "H100"
+          },
+          {
+            "name": "RTX4090"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HardwareRented",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "provider",
+            "type": "pubkey"
+          },
+          {
+            "name": "renter",
+            "type": "pubkey"
+          },
+          {
+            "name": "final_price",
+            "type": "u64"
+          },
+          {
+            "name": "duration_hours",
+            "type": "u16"
+          },
+          {
+            "name": "gpu_type",
+            "type": {
+              "defined": {
+                "name": "GpuType"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "MultiplierUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "provider",
+            "type": "pubkey"
+          },
+          {
+            "name": "old_multiplier",
+            "type": "u16"
+          },
+          {
+            "name": "new_multiplier",
+            "type": "u16"
+          },
+          {
+            "name": "reasoning_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OracleUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "old_oracle",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_oracle",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PriceEntry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "multiplier",
+            "type": "u16"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "reasoning_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "PriceHistory",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "provider",
+            "type": "pubkey"
+          },
+          {
+            "name": "entries",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "PriceEntry"
+                  }
+                },
+                10
+              ]
+            }
+          },
+          {
+            "name": "current_index",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProtocolConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "oracle",
+            "type": "pubkey"
+          },
+          {
+            "name": "min_multiplier",
+            "type": "u16"
+          },
+          {
+            "name": "max_multiplier",
+            "type": "u16"
+          },
+          {
+            "name": "update_cooldown",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProviderConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "gpu_type",
+            "type": {
+              "defined": {
+                "name": "GpuType"
+              }
+            }
+          },
+          {
+            "name": "base_price",
+            "type": "u64"
+          },
+          {
+            "name": "current_multiplier",
+            "type": "u16"
+          },
+          {
+            "name": "last_updated",
+            "type": "i64"
+          },
+          {
+            "name": "total_rentals",
+            "type": "u64"
+          },
+          {
+            "name": "is_active",
+            "type": "bool"
+          }
+        ]
+      }
+    }
+  ]
+}
