@@ -10,7 +10,7 @@ const EVENTS = [
   { key: "low_demand",   label: "Low Demand",       desc: "Market correction · compute −15%",    dir: "↓", c: "var(--cyan)"  },
 ] as const;
 
-const AUTO_INTERVAL_MS = 60_000; // 60s auto-update when toggled ON (matches server)
+const AUTO_INTERVAL_MS = 60_000; // 60s — must match server autonomous loop interval
 
 export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
   const [loading,   setLoading]   = useState<string | null>(null);
@@ -138,7 +138,7 @@ export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
               🤖 Organic AI Update
             </p>
             <p style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "var(--t3)" }}>
-              {autoOn ? `Next update in ${countdown}s` : "Auto-update every 60 s"}
+              {autoOn ? `Next update in ${countdown}s` : `Auto-update every ${AUTO_INTERVAL_MS / 1000} s`}
             </p>
           </div>
 

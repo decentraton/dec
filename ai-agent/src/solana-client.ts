@@ -129,9 +129,20 @@ export async function syncOnChainStats(program: any, oraclePubKey: PublicKey) {
     try {
         console.log("[SYNC] 🔄 Pulling on-chain state...");
         
-        // 1. Get total transaction count for the program
-        const signatures = await program.provider.connection.getSignaturesForAddress(PROGRAM_ID, { limit: 1000 });
-        const updateCount = signatures.filter((s: any) => !s.err).length;
+        // 1. Get total transaction count for the program (paginate to bypass 1000-sig RPC cap)
+        let allSignatures: any[] = [];
+        let before: string | undefined = undefined;
+        while (true) {
+            const batch = await program.provider.connection.getSignaturesForAddress(
+                PROGRAM_ID,
+                { limit: 1000, ...(before ? { before } : {}) }
+            );
+            if (batch.length === 0) break;
+            allSignatures = allSignatures.concat(batch);
+            if (batch.length < 1000) break; // last page
+            before = batch[batch.length - 1].signature;
+        }
+        const updateCount = allSignatures.filter((s: any) => !s.err).length;
 
         // 2. Fetch the current provider config and history
         const [providerAcc, historyAcc] = await Promise.all([
