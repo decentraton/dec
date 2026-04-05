@@ -317,37 +317,30 @@ const INSTANT_PRESETS: Record<string, { multiplier: number; label: string; reaso
     bear_market:      { multiplier: 0.55, label: "Bear Market",       reasoning: "Demo scenario: sustained crypto bear market reduces GPU rental demand to 0.55×." },
 };
 
-app.post("/api/simulate-instant/:preset", async (req: Request, res: Response) => {
+app.post("/api/simulate-instant/:preset", (req: Request, res: Response) => {
     const key = req.params.preset;
     const preset = INSTANT_PRESETS[key];
     if (!preset) {
         return res.status(404).json({ error: `Unknown preset "${key}". Available: ${Object.keys(INSTANT_PRESETS).join(", ")}` });
     }
 
-    console.log(`\n[ INSTANT ] ──── ${key.toUpperCase()} → ${preset.multiplier}× (no AI) ────`);
-    try {
-        const mulScaled = Math.round(preset.multiplier * 100);
-        const tx = await updateOnChain(program, oracleKeypair, mulScaled, preset.reasoning);
-        const rHash = hashReasoning(preset.reasoning);
+    console.log(`\n[ INSTANT ] ──── ${key.toUpperCase()} → ${preset.multiplier}× (no AI, no chain) ────`);
 
-        const entry: AnalysisEntry = {
-            multiplier: preset.multiplier,
-            reasoning: preset.reasoning,
-            reasoningHash: rHash,
-            timestamp: Date.now(),
-            txSignature: tx,
-            event: `instant_${key}`,
-            confidence: 100,
-        };
-        lastAnalysis = entry;
-        pushHistory(entry);
-        totalUpdates++;
+    const rHash = hashReasoning(preset.reasoning);
+    const entry: AnalysisEntry = {
+        multiplier: preset.multiplier,
+        reasoning: preset.reasoning,
+        reasoningHash: rHash,
+        timestamp: Date.now(),
+        txSignature: null, // no chain write — instant response for demos
+        event: `instant_${key}`,
+        confidence: 100,
+    };
+    lastAnalysis = entry;
+    pushHistory(entry);
+    totalUpdates++;
 
-        res.json({ success: true, ...entry });
-    } catch (err: any) {
-        console.error("[INSTANT] Error:", err.message);
-        res.status(500).json({ error: err.message });
-    }
+    res.json({ success: true, ...entry });
 });
 
 /** Trigger an organic AI update */

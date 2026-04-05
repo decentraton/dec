@@ -40,14 +40,18 @@ export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
 
   const fire = async (key: string, url: string) => {
     setLoading(key); setLast(null);
+    console.log("[v0] fire() called:", key, `${API_BASE}${url}`);
     try {
       const r = await fetch(`${API_BASE}${url}`, { method: "POST" });
       const d = await r.json();
+      console.log("[v0] fire() response:", r.status, d);
       if (r.ok && d.multiplier !== undefined) {
         setLast({ event: key, mul: d.multiplier, tx: d.txSignature });
         onUpdate();
       }
-    } catch {}
+    } catch (err) {
+      console.log("[v0] fire() error:", err);
+    }
     finally { setLoading(null); }
   };
 
