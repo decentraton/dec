@@ -29,13 +29,7 @@ const SCENARIOS = [
   { key: "flash_crash",    label: "Flash Crash",    mul: "0.3×", dir: "↓", c: "#ff4444", bg: "#ff444418" },
 ] as const;
 
-// ── GPU models (4 cards = 2 × 2 grid) ──────────────────────────────────────
-const GPU_MODELS = [
-  { key: "gpu_h100",    label: "H100 SXM5", vram: "80 GB", mul: "2.5×", tier: "HPC",       c: "#ff4444", bg: "#ff444418" },
-  { key: "gpu_a100",    label: "A100",      vram: "80 GB", mul: "1.9×", tier: "Training",  c: "#b8ff3c", bg: "#b8ff3c18" },
-  { key: "gpu_l40s",    label: "L40S",      vram: "48 GB", mul: "1.4×", tier: "Inference", c: "#00c896", bg: "#00c89618" },
-  { key: "gpu_rtx4090", label: "RTX 4090",  vram: "24 GB", mul: "1.0×", tier: "Prosumer",  c: "#22d3ee", bg: "#22d3ee18" },
-] as const;
+
 
 const AUTO_INTERVAL_MS = 60_000; // 60s — must match server autonomous loop interval
 
@@ -177,44 +171,7 @@ export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
         })}
       </div>
 
-      {/* ── 3. GPU Model ── */}
-      <hr className="hairline" style={{ margin: "0 0 12px" }} />
-      <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
-        GPU Model · Select
-      </p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5px", marginBottom: "12px" }}>
-        {GPU_MODELS.map(gpu => {
-          const isLoading = loading === `instant_${gpu.key}`;
-          return (
-            <button
-              key={gpu.key}
-              onClick={() => fire(`instant_${gpu.key}`, `/api/simulate-instant/${gpu.key}`)}
-              disabled={loading !== null}
-              aria-label={`Select GPU: ${gpu.label}`}
-              style={{
-                display: "flex", flexDirection: "column", alignItems: "flex-start",
-                padding: "10px 12px", borderRadius: "8px",
-                border: `1px solid ${isLoading ? gpu.c : "var(--line)"}`,
-                background: isLoading ? gpu.bg : "var(--raised)",
-                cursor: loading ? "not-allowed" : "pointer",
-                opacity: loading && !isLoading ? 0.35 : 1,
-                transition: "all 0.15s ease", textAlign: "left", width: "100%",
-              }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", marginBottom: "4px" }}>
-                <span style={{ fontFamily: "var(--mono)", fontSize: "12px", fontWeight: 700, color: isLoading ? gpu.c : "var(--t1)" }}>{gpu.label}</span>
-                {isLoading ? <Spinner /> : <span style={{ fontFamily: "var(--mono)", fontSize: "11px", color: gpu.c, fontWeight: 700 }}>{gpu.mul}</span>}
-              </div>
-              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)" }}>{gpu.vram}</span>
-                <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--line-hi)" }}>·</span>
-                <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: gpu.c }}>{gpu.tier}</span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── 4. AI Scenarios ── */}
+      {/* ── 3. AI Scenarios ── */}
       <hr className="hairline" style={{ margin: "0 0 12px" }} />
       <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
         AI Scenarios · Gemini

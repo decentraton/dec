@@ -26,6 +26,32 @@ function Typer({ text }: { text: string }) {
 
 interface Status { totalUpdates: number; uptimeMs: number; programLoaded: boolean; }
 
+const EVENT_META: Record<string, { label: string; tag: string; tagColor: string }> = {
+  // AI scenarios
+  gpu_shortage:      { label: "NVIDIA disruption detected",          tag: "AI · GPU Shortage",   tagColor: "var(--red)"   },
+  bull_run:          { label: "Crypto market heating up",            tag: "AI · Bull Run",        tagColor: "var(--acid)"  },
+  low_demand:        { label: "Compute demand softening",            tag: "AI · Low Demand",      tagColor: "var(--cyan)"  },
+  // Instant price overrides
+  instant_price_spike:   { label: "Emergency ceiling applied",       tag: "Override · Spike",     tagColor: "#ff4444"      },
+  instant_price_up:      { label: "Demand pressure acknowledged",    tag: "Override · +50%",      tagColor: "#b8ff3c"      },
+  instant_price_reset:   { label: "Oracle reset to baseline",        tag: "Override · Reset",     tagColor: "#888"         },
+  instant_price_down:    { label: "Oversupply discount active",      tag: "Override · −30%",      tagColor: "#22d3ee"      },
+  instant_price_crash:   { label: "Floor price enforced",            tag: "Override · Crash",     tagColor: "#7b61ff"      },
+  // Market scenarios
+  instant_gpu_surge:     { label: "H100 supply crunch in effect",    tag: "Scenario · GPU Surge",     tagColor: "#ff4444" },
+  instant_network_peak:  { label: "Solana congestion window open",   tag: "Scenario · Net Peak",      tagColor: "#b8ff3c" },
+  instant_depin_adoption:{ label: "DePIN infrastructure wave",       tag: "Scenario · DePIN",         tagColor: "#00c896" },
+  instant_recovery:      { label: "Liquidity returning to market",   tag: "Scenario · Recovery",      tagColor: "#22d3ee" },
+  instant_bear_market:   { label: "Risk-off mode — demand cold",     tag: "Scenario · Bear",          tagColor: "#7b61ff" },
+  instant_flash_crash:   { label: "Panic sell-off triggered",        tag: "Scenario · Flash Crash",   tagColor: "#ff4444" },
+  instant_compute_famine:{ label: "Critical node shortage — all out",tag: "Scenario · Compute Famine",tagColor: "#ff6b00" },
+  // GPU model
+  instant_gpu_h100:      { label: "H100 SXM5 tier selected",        tag: "GPU · H100 SXM5",      tagColor: "#ff4444" },
+  instant_gpu_a100:      { label: "A100 training tier selected",     tag: "GPU · A100 80 GB",     tagColor: "#b8ff3c" },
+  instant_gpu_l40s:      { label: "L40S inference tier selected",    tag: "GPU · L40S 48 GB",     tagColor: "#00c896" },
+  instant_gpu_rtx4090:   { label: "RTX 4090 prosumer tier selected", tag: "GPU · RTX 4090",       tagColor: "#22d3ee" },
+};
+
 export function AiReasoning({ analysis, loading }: { analysis: any; loading: boolean }) {
   const [online, setOnline] = useState(false);
   const [status, setStatus] = useState<Status | null>(null);
@@ -43,8 +69,10 @@ export function AiReasoning({ analysis, loading }: { analysis: any; loading: boo
     return h > 0 ? `${h}h ${m % 60}m` : `${m}m ${s % 60}s`;
   };
 
-  const mul = analysis?.multiplier ?? 1;
-  const mc  = mul > 1.05 ? "var(--acid)" : mul < 0.95 ? "var(--red)" : "var(--t2)";
+  const mul   = analysis?.multiplier ?? 1;
+  const mc    = mul > 1.05 ? "var(--acid)" : mul < 0.95 ? "var(--red)" : "var(--t2)";
+  const evKey = analysis?.event as string | undefined;
+  const meta  = evKey ? EVENT_META[evKey] : null;
 
   return (
     <section aria-label="Oracle Status" className="card accent-bar scanline" style={{ padding: "22px" }}>
@@ -104,7 +132,20 @@ export function AiReasoning({ analysis, loading }: { analysis: any; loading: boo
 
       {/* Reasoning */}
       <div style={{ marginBottom: "14px" }}>
-        <p className="lbl" style={{ marginBottom: "8px" }}>AI Reasoning</p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+          <p className="lbl">AI Reasoning</p>
+          {meta && (
+            <span style={{
+              fontFamily: "var(--mono)", fontSize: "10px", fontWeight: 700,
+              color: meta.tagColor, background: `${meta.tagColor}18`,
+              border: `1px solid ${meta.tagColor}44`,
+              borderRadius: "5px", padding: "2px 8px",
+              letterSpacing: "0.04em", textTransform: "uppercase",
+            }}>
+              {meta.tag}
+            </span>
+          )}
+        </div>
         <div style={{
           background: "var(--void)", border: "1px solid var(--border)",
           borderRadius: "8px", padding: "14px 16px", minHeight: "72px",
@@ -116,6 +157,11 @@ export function AiReasoning({ analysis, loading }: { analysis: any; loading: boo
             }
           </p>
         </div>
+        {meta && (
+          <p style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "var(--t3)", marginTop: "6px", paddingLeft: "2px" }}>
+            {meta.label}
+          </p>
+        )}
       </div>
 
       {/* Hash */}

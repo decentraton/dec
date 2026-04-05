@@ -27,11 +27,20 @@ interface Prov {
 }
 
 export function GpuMarketplace() {
-  const [provs,   setProvs]   = useState<Prov[]>([]);
-  const [mul,     setMul]     = useState(1);
-  const [busy,    setBusy]    = useState<string | null>(null);
-  const [filter,  setFilter]  = useState<"all" | "available">("all");
-  const [lastRent, setLastRent] = useState<{ name: string; sig: string } | null>(null);
+  const [provs,     setProvs]     = useState<Prov[]>([]);
+  const [mul,       setMul]       = useState(1);
+  const [busy,      setBusy]      = useState<string | null>(null);
+  const [filter,    setFilter]    = useState<"all" | "available">("all");
+  const [gpuFilter, setGpuFilter] = useState<string>("all");
+  const [lastRent,  setLastRent]  = useState<{ name: string; sig: string } | null>(null);
+
+  const GPU_FILTER_OPTIONS = [
+    { key: "all",    label: "All GPUs" },
+    { key: "H100",   label: "H100" },
+    { key: "A100",   label: "A100" },
+    { key: "L40S",   label: "L40S" },
+    { key: "4090",   label: "RTX 4090" },
+  ] as const;
   const { publicKey, sendTransaction, connected } = useWallet();
   const { connection } = useConnection();
 
@@ -65,13 +74,14 @@ export function GpuMarketplace() {
     } finally { setBusy(null); }
   };
 
-  const list   = filter === "available" ? provs.filter(p => p.status === "available") : provs;
-  const avail  = provs.filter(p => p.status === "available").length;
+  const byAvail = filter === "available" ? provs.filter(p => p.status === "available") : provs;
+  const list    = gpuFilter === "all" ? byAvail : byAvail.filter(p => p.model.includes(gpuFilter));
+  const avail   = provs.filter(p => p.status === "available").length;
 
   return (
     <section aria-label="GPU Marketplace">
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "16px" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "12px" }}>
         <div>
           <h2 style={{ fontFamily: "var(--sans)", fontSize: "20px", fontWeight: 700, letterSpacing: "-0.02em", color: "var(--t1)", marginBottom: "4px" }}>
             GPU Marketplace
@@ -86,7 +96,7 @@ export function GpuMarketplace() {
             }}>{mul.toFixed(2)}×</span>
           </p>
         </div>
-        <div role="tablist" aria-label="Filter nodes" style={{ display: "flex", gap: "5px" }}>
+        <div role="tablist" aria-label="Filter by availability" style={{ display: "flex", gap: "5px" }}>
           {(["all", "available"] as const).map(f => (
             <button key={f} role="tab" aria-selected={filter === f}
               onClick={() => setFilter(f)}
@@ -96,6 +106,24 @@ export function GpuMarketplace() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* GPU model filter */}
+      <div role="tablist" aria-label="Filter by GPU model" style={{ display: "flex", gap: "5px", marginBottom: "16px", flexWrap: "wrap" }}>
+        {GPU_FILTER_OPTIONS.map(opt => (
+          <button key={opt.key} role="tab" aria-selected={gpuFilter === opt.key}
+            onClick={() => setGpuFilter(opt.key)}
+            style={{
+              fontFamily: "var(--mono)", fontSize: "11px", fontWeight: 700,
+              padding: "5px 12px", borderRadius: "6px", cursor: "pointer",
+              border: gpuFilter === opt.key ? "1px solid var(--acid)" : "1px solid var(--border)",
+              background: gpuFilter === opt.key ? "rgba(184,255,60,0.1)" : "var(--raised)",
+              color: gpuFilter === opt.key ? "var(--acid)" : "var(--t3)",
+              transition: "all 0.15s ease",
+            }}>
+            {opt.label}
+          </button>
+        ))}
       </div>
 
       {/* Grid */}
