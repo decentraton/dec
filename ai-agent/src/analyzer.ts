@@ -109,10 +109,16 @@ Respond ONLY with raw JSON, no markdown:
     try {
       console.log(`[AI] Calling ${model} via v1 REST…`);
       const res = await callGeminiRest(model, prompt);
-      console.log(`[AI] ✅ ${model} → ${res.multiplier}× | "${res.reasoning.slice(0, 60)}"`);
+      console.log(`[ AI ] [ OK ] ${model} -> ${res.multiplier}x | "${res.reasoning.slice(0, 60)}"`);
       return res;
     } catch (e: any) {
-      console.warn(`[AI] ❌ ${model}: ${e.message?.slice(0, 120)}`);
+      if (e.message?.includes("429") || e.message?.includes("quota")) {
+        console.warn(`\n[ AI ] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
+        console.warn(`[ AI ] !!  QUOTA LIMIT REACHED: ${model}`);
+        console.warn(`[ AI ] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n`);
+      } else {
+        console.warn(`[ AI ] [ !! ] ${model}: ${e.message?.slice(0, 120)}`);
+      }
     }
   }
 
@@ -130,10 +136,16 @@ Respond ONLY with raw JSON, no markdown:
       const parsed  = JSON.parse(content);
       if (typeof parsed.multiplier !== "number") throw new Error("No multiplier");
       const mul = normMul(parsed.multiplier);
-      console.log(`[AI] ✅ gpt-4o-mini → ${mul}×`);
+      console.log(`[ AI ] [ OK ] gpt-4o-mini -> ${mul}x`);
       return { multiplier: mul, reasoning: String(parsed.reasoning || "") };
     } catch (e: any) {
-      console.warn(`[AI] ❌ gpt-4o-mini: ${e.message?.slice(0, 100)}`);
+      if (e.message?.includes("429") || e.message?.includes("quota")) {
+        console.warn(`\n[ AI ] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
+        console.warn(`[ AI ] !!  QUOTA LIMIT REACHED: gpt-4o-mini`);
+        console.warn(`[ AI ] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n`);
+      } else {
+        console.warn(`[ AI ] [ !! ] gpt-4o-mini: ${e.message?.slice(0, 100)}`);
+      }
     }
   }
 

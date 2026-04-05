@@ -103,10 +103,18 @@ export async function updateOnChain(program: any, oracleKeypair: Keypair, multip
             })
             .rpc();
 
-        console.log(`[TX] ✅ https://explorer.solana.com/tx/${tx}?cluster=devnet`);
+        console.log(`[ TX ] [ SUCCESS ] https://explorer.solana.com/tx/${tx}?cluster=devnet`);
         return tx;
     } catch(err: any) {
-        console.error("[TX] ❌ Failed: ", err.message?.slice(0, 300));
+        if (err.message?.includes("6002") || err.message?.includes("CooldownNotElapsed")) {
+            console.error(`\n####################################################################`);
+            console.error(`# [ BLOCKCHAIN ] [ !! ] COOLDOWN ACTIVE`);
+            console.error(`# Error: CooldownNotElapsed (6002)`);
+            console.error(`# The protocol is protecting against spam. Please wait ~60s.`);
+            console.error(`####################################################################\n`);
+        } else {
+            console.error("[ TX ] [ ERROR ] Failed: ", err.message?.slice(0, 300));
+        }
         return null;
     }
 }

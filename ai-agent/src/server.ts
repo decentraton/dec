@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import * as path from "path";
+import * as fs from "fs";
 import * as crypto from "crypto";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import OpenAI from "openai";
@@ -48,8 +49,36 @@ let lastAnalysis: AnalysisEntry = {
 
 const analysisHistory: AnalysisEntry[] = [];
 const startTime = Date.now();
+const SETTINGS_PATH = path.resolve(import.meta.dirname, "../data/settings.json");
+
 let totalUpdates = 0;
-let isAutonomousEnabled = false; // Controlled by frontend toggle
+let isAutonomousEnabled = false;
+
+// ── Persistence Helpers ───────────────────────────────────────────────
+function loadSettings() {
+    try {
+        if (fs.existsSync(SETTINGS_PATH)) {
+            const data = JSON.parse(fs.readFileSync(SETTINGS_PATH, "utf-8"));
+            isAutonomousEnabled = !!data.isAutonomousEnabled;
+            console.log(`[INIT] Loaded settings from disk: Autonomous=${isAutonomousEnabled}`);
+        }
+    } catch (err) {
+        console.warn("[INIT] Could not load settings, using defaults.");
+    }
+}
+
+function saveSettings() {
+    try {
+        const dir = path.dirname(SETTINGS_PATH);
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(SETTINGS_PATH, JSON.stringify({ isAutonomousEnabled }, null, 2));
+    } catch (err) {
+        console.warn("[WARN] Failed to save settings to disk.");
+    }
+}
+
+// Initial load
+loadSettings();
 
 // ── GPU Providers catalog ──────────────────────────────────────────────
 const GPU_PROVIDERS = [
@@ -173,6 +202,7 @@ app.post("/api/settings/toggle", (req: Request, res: Response) => {
     } else {
         isAutonomousEnabled = !isAutonomousEnabled;
     }
+    saveSettings();
     console.log(`[SETTINGS] Autonomous mode is now: ${isAutonomousEnabled ? "ON" : "OFF"}`);
     res.json({ isAutonomousEnabled });
 });
@@ -238,7 +268,9 @@ app.post("/api/simulate/:event", async (req: Request, res: Response) => {
         return res.status(404).json({ error: `Unknown event "${eventKey}". Available: ${Object.keys(DEMO_EVENTS).join(", ")}` });
     }
 
-    console.log(`\n[SIMULATE] ──── ${eventKey} ────`);
+    console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+    console.log(`[ SIMULATE ] ──── ${eventKey.toUpperCase()} ────`);
+    console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
     try {
         const enriched = await enrichWithMarketData(mockData);
         const decision = await analyzeWithAI(enriched, genAI, openai);
@@ -306,7 +338,9 @@ async function runAutonomousUpdate() {
         return;
     }
 
-    console.log(`\n[AUTONOMOUS] ──── Triggering periodic update ────`);
+    console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+    console.log(`[ AUTONOMOUS ] ──── Periodic Update Cycle ────`);
+    console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
     try {
         const signals = fetchMarketData();
         const enriched = await enrichWithMarketData(signals);
@@ -330,7 +364,7 @@ async function runAutonomousUpdate() {
             lastAnalysis = entry;
             pushHistory(entry);
             totalUpdates++;
-            console.log(`[AUTONOMOUS] ✅ multiplier=${decision.multiplier.toFixed(3)} tx=${tx}`);
+            console.log(`[ AUTONOMOUS ] [ SUCCESS ] Multiplier: ${decision.multiplier.toFixed(3)}x | TX: ${tx.slice(0, 32)}...`);
         }
     } catch (err: any) {
         if (err.message?.includes("CooldownNotElapsed")) {
