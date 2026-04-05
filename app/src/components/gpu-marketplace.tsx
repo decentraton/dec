@@ -31,6 +31,7 @@ export function GpuMarketplace() {
   const [mul,     setMul]     = useState(1);
   const [busy,    setBusy]    = useState<string | null>(null);
   const [filter,  setFilter]  = useState<"all" | "available">("all");
+  const [lastRent, setLastRent] = useState<{ name: string; sig: string } | null>(null);
   const { publicKey, sendTransaction, connected } = useWallet();
   const { connection } = useConnection();
 
@@ -56,7 +57,9 @@ export function GpuMarketplace() {
       }));
       const sig = await sendTransaction(tx, connection);
       await connection.confirmTransaction(sig, "confirmed");
-      alert(`✅ Rented ${p.name}\n\nSignature: ${sig.slice(0, 24)}…\nCost: ${p.currentPrice.toFixed(4)} SOL/hr`);
+      setLastRent({ name: p.name, sig });
+      // Auto-hide after 10 seconds
+      setTimeout(() => setLastRent(null), 10000);
     } catch (e: any) {
       if (!e.message?.includes("rejected")) alert(`Transaction failed — ${e.message}`);
     } finally { setBusy(null); }
@@ -198,6 +201,73 @@ export function GpuMarketplace() {
           );
         })}
       </div>
+
+      {/* ── Success Notification Bar ── */}
+      {lastRent && (
+        <div style={{
+          position: "fixed", bottom: "24px", left: "50%", transform: "translateX(-50%)",
+          zIndex: 100, width: "100%", maxWidth: "480px", padding: "0 20px",
+          animation: "slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+        }}>
+          <style>{`
+            @keyframes slideUp {
+              from { transform: translate(-50%, 40px); opacity: 0; }
+              to { transform: translate(-50%, 0); opacity: 1; }
+            }
+          `}</style>
+          
+          <div className="card" style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "14px 20px", background: "rgba(8,12,16,0.95)",
+            border: "1px solid var(--acid)", boxShadow: "0 8px 32px rgba(184,255,60,0.15)",
+            borderRadius: "12px", backdropFilter: "blur(12px)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{
+                width: "32px", height: "32px", borderRadius: "50%",
+                background: "rgba(184,255,60,0.15)", display: "flex",
+                alignItems: "center", justifyContent: "center", flexShrink: 0
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--acid)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <p style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "var(--t1)", marginBottom: "1px" }}>
+                  Successfully Rented!
+                </p>
+                <p style={{ fontFamily: "var(--sans)", fontSize: "12px", color: "var(--t3)" }} className="truncate">
+                  {lastRent.name}
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <a href={`https://explorer.solana.com/tx/${lastRent.sig}?cluster=devnet`}
+                target="_blank" rel="noopener noreferrer"
+                style={{
+                  fontFamily: "var(--sans)", fontSize: "12px", fontWeight: 600,
+                  color: "var(--acid)", textDecoration: "none", whiteSpace: "nowrap",
+                  padding: "6px 12px", borderRadius: "6px", background: "rgba(184,255,60,0.08)",
+                  border: "1px solid rgba(184,255,60,0.2)", transition: "all 0.2s ease"
+                }}>
+                View TX ↗
+              </a>
+              <button 
+                onClick={() => setLastRent(null)}
+                style={{
+                  background: "none", border: "none", color: "var(--t3)",
+                  cursor: "pointer", padding: "4px", display: "flex", alignItems: "center"
+                }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

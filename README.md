@@ -1,7 +1,5 @@
 # Autonomous DePIN Pricing Oracle (Solana + Gemini AI)
 
-> National Solana Hackathon 2025
-
 AI-powered dynamic pricing oracle for DePIN GPU compute networks, built on Solana. The protocol autonomously adjusts price multipliers every 60 seconds based on real-time market signals using Google Gemini AI, recording every decision on-chain with SHA-256 proof.
 
 🔗 **Live Demo:** [https://depin-pricing-app.onrender.com/](https://depin-pricing-app.onrender.com/) | **Program:** [`HCvBL7…BHSJ1`](https://explorer.solana.com/address/HCvBL7SYEyHX82gLENzoD2DUSogqqyEcX3og3upBHSJ1?cluster=devnet)
