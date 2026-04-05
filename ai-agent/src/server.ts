@@ -299,6 +299,48 @@ app.post("/api/simulate/:event", async (req: Request, res: Response) => {
     }
 });
 
+/** Instant price override — no AI call, for live demos */
+const INSTANT_PRESETS: Record<string, { multiplier: number; label: string; reasoning: string }> = {
+    price_spike:   { multiplier: 2.8, label: "Price Spike",   reasoning: "Manual demo override: extreme demand spike — GPU price surged to 2.8×." },
+    price_up:      { multiplier: 1.5, label: "Price +50%",    reasoning: "Manual demo override: demand increased — GPU price set to 1.5×." },
+    price_reset:   { multiplier: 1.0, label: "Price Reset",   reasoning: "Manual demo override: market neutral — GPU price reset to 1.0×." },
+    price_down:    { multiplier: 0.7, label: "Price −30%",    reasoning: "Manual demo override: oversupply signal — GPU price dropped to 0.7×." },
+    price_crash:   { multiplier: 0.4, label: "Price Crash",   reasoning: "Manual demo override: demand collapse — GPU price crashed to 0.4×." },
+};
+
+app.post("/api/simulate-instant/:preset", async (req: Request, res: Response) => {
+    const key = req.params.preset;
+    const preset = INSTANT_PRESETS[key];
+    if (!preset) {
+        return res.status(404).json({ error: `Unknown preset "${key}". Available: ${Object.keys(INSTANT_PRESETS).join(", ")}` });
+    }
+
+    console.log(`\n[ INSTANT ] ──── ${key.toUpperCase()} → ${preset.multiplier}× (no AI) ────`);
+    try {
+        const mulScaled = Math.round(preset.multiplier * 100);
+        const tx = await updateOnChain(program, oracleKeypair, mulScaled, preset.reasoning);
+        const rHash = hashReasoning(preset.reasoning);
+
+        const entry: AnalysisEntry = {
+            multiplier: preset.multiplier,
+            reasoning: preset.reasoning,
+            reasoningHash: rHash,
+            timestamp: Date.now(),
+            txSignature: tx,
+            event: `instant_${key}`,
+            confidence: 100,
+        };
+        lastAnalysis = entry;
+        pushHistory(entry);
+        totalUpdates++;
+
+        res.json({ success: true, ...entry });
+    } catch (err: any) {
+        console.error("[INSTANT] Error:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 /** Trigger an organic AI update */
 app.post("/api/trigger-update", async (req: Request, res: Response) => {
     try {

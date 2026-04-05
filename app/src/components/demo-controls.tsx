@@ -10,6 +10,14 @@ const EVENTS = [
   { key: "low_demand",   label: "Low Demand",       desc: "Market correction · compute −15%",    dir: "↓", c: "var(--cyan)"  },
 ] as const;
 
+const INSTANT_PRESETS = [
+  { key: "price_spike", label: "2.8×", desc: "Spike",  mul: 2.8, c: "#ff4444" },
+  { key: "price_up",    label: "1.5×", desc: "+50%",   mul: 1.5, c: "var(--acid)" },
+  { key: "price_reset", label: "1.0×", desc: "Reset",  mul: 1.0, c: "var(--t3)" },
+  { key: "price_down",  label: "0.7×", desc: "−30%",   mul: 0.7, c: "var(--cyan)" },
+  { key: "price_crash", label: "0.4×", desc: "Crash",  mul: 0.4, c: "#7b61ff" },
+] as const;
+
 const AUTO_INTERVAL_MS = 60_000; // 60s — must match server autonomous loop interval
 
 export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
@@ -88,6 +96,46 @@ export function DemoControls({ onUpdate }: { onUpdate: () => void }) {
         <span className="tag tag-dim" style={{ fontSize: "10px" }}>Demo</span>
       </div>
 
+      {/* ── Instant Price Override ── */}
+      <div style={{ marginBottom: "12px" }}>
+        <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
+          Instant Override · No AI
+        </p>
+        <div style={{ display: "flex", gap: "6px" }}>
+          {INSTANT_PRESETS.map(p => {
+            const isLoading = loading === `instant_${p.key}`;
+            return (
+              <button
+                key={p.key}
+                onClick={() => fire(`instant_${p.key}`, `/api/simulate-instant/${p.key}`)}
+                disabled={loading !== null}
+                aria-label={`Set price to ${p.label}`}
+                style={{
+                  flex: 1,
+                  display: "flex", flexDirection: "column", alignItems: "center",
+                  padding: "9px 4px",
+                  borderRadius: "8px",
+                  border: `1px solid ${isLoading ? p.c + "88" : "var(--line)"}`,
+                  background: isLoading ? `${p.c}18` : "var(--raised)",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  opacity: loading && !isLoading ? 0.4 : 1,
+                  transition: "background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease",
+                }}>
+                <span style={{ fontFamily: "var(--mono)", fontSize: "13px", fontWeight: 800, color: isLoading ? p.c : "var(--t1)", lineHeight: 1.2 }}>{p.label}</span>
+                <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: p.c, marginTop: "3px" }}>{p.desc}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Divider */}
+      <hr className="hairline" style={{ margin: "10px 0 12px" }} />
+
+      {/* Scenario buttons (AI) */}
+      <p style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
+        AI Scenarios · Gemini Analysis
+      </p>
       {/* Scenario buttons */}
       <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "12px" }}>
         {EVENTS.map(ev => {
